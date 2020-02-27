@@ -1,0 +1,39 @@
+{
+  "name": "axios-sugar",
+  "version": "1.0.0",
+  "description": "",
+  "main": "dist/axios-sugar.js",
+  "scripts": {
+    "start": "npm run dev",
+    "dev": "set NODE_ENV=development && npx rollup -c rollup.config.js -w",
+    "build": "set NODE_ENV=production && npx rollup -c rollup.config.js",
+    "es-fix": "npx eslint --fix",
+    "test": "npx mocha --reporter spec --require ts-node/register test/**/*.test.ts"
+  },
+  "typings": "types/index.d.ts",
+  "author": "maoyonglong",
+  "license": "MIT",
+  "homepage": "https://github.com/maoyonglong/axios-sugar",
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:maoyonglong/axios-sugar.git"
+  },
+  "devDependencies": {
+    "@types/chai": "^4.2.9",
+    "@types/mocha": "^7.0.1",
+    "@typescript-eslint/eslint-plugin": "^2.19.2",
+    "@typescript-eslint/parser": "^2.19.2",
+    "chai": "^4.2.0",
+    "eslint": "^6.8.0",
+    "mocha": "^7.0.1",
+    "rollup": "^1.31.0",
+    "rollup-plugin-typescript2": "^0.25.3",
+    "rollup-plugin-uglify": "^6.0.4",
+    "ts-node": "^8.6.2",
+    "typescript": "^3.7.5"
+  },
+  "dependencies": {
+    "axios": "^0.19.2",
+    "uuid": "^7.0.1"
+  }
+}

@@ -1,0 +1,3 @@
+{
+  "extend": ["plugin:@typescript-eslint/recommend"]
+}

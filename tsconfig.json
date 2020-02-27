@@ -1,0 +1,13 @@
+{
+  "compilerOptions": {
+    "declaration":true,
+    "declarationDir": "types",
+    "removeComments": true
+  },
+  "include": [
+    "src"
+  ],
+  "exclude": [
+    "node_modules"
+  ]
+}
