@@ -5,7 +5,8 @@
     "removeComments": true
   },
   "include": [
-    "src"
+    "src",
+    "node_modules/axios/lib/utils.js"
   ],
   "exclude": [
     "node_modules"

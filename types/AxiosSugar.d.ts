@@ -3,14 +3,16 @@ import { AxiosSugarConfig } from './default';
 export interface AxiosSugar {
     requestConfigs: Array<AxiosRequestConfig>;
     config: AxiosSugarConfig;
-    _axios: AxiosInstance;
+    axiosInstance: AxiosInstance;
     injectProp: string;
-    setConfig(config: AxiosSugarConfig): any;
-    injectReqConfig(config: AxiosRequestConfig): any;
+    setConfig: Function;
+    injectReqConfig: Function;
     beforeRequest: Function;
     beforeResponse: Function;
     beforeSuccess: Function;
     beforeError: Function;
+    getStore: Function;
+    clear: Function;
 }
 declare const axiosSugar: AxiosSugar;
 export default axiosSugar;

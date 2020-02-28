@@ -13,11 +13,16 @@ export type rule =  1 | 2;
 
 export const getCompareSymbol = (rule: rule = 1, injectProp: string, config: AxiosRequestConfig): csymbol => {
   if (rule === 1) {
-    const method = config.method;
     // ignore some prop
     const conf = JSON.parse(JSON.stringify(config));
     delete conf.headers;
     delete conf.timeout;
+    delete conf.transformRequest;
+    delete conf.transformResponse;
+    delete conf.xsrfCookieName;
+    delete conf.xsrfHeaderName;
+    delete conf["X-XSRF-TOKEN"];
+    delete conf.maxContentLength;
     delete conf[injectProp];
 
     return JSON.stringify(conf);

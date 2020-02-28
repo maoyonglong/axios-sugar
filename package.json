@@ -1,8 +1,8 @@
 {
   "name": "axios-sugar",
   "version": "1.0.0",
-  "description": "",
-  "main": "dist/axios-sugar.js",
+  "description": "An axios wrapper, which supports resending, store and so on",
+  "main": "dist/axios-sugar.cjs.js",
   "scripts": {
     "start": "npm run dev",
     "dev": "set NODE_ENV=development && npx rollup -c rollup.config.js -w",

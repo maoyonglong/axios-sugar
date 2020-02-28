@@ -1,15 +1,24 @@
 import { csymbol } from './compare';
 import { AxiosResponse } from 'axios';
 
-export default {
-  store: {},
+export interface AxiosSugarStore {
+  data: object,
+  save: Function,
+  get: Function,
+  contains: Function
+}
+
+const Store: AxiosSugarStore = {
+  data: {},
   save (symbol: csymbol, res: AxiosResponse) {
-    this.store[symbol] = res;
+    this.data[symbol] = res;
   },
   get (symbol: csymbol): any {
-    return this.store[symbol];
+    return this.data[symbol];
   },
   contains (key): boolean {
-    return typeof this.store[key] !== undefined;
+    return typeof this.data[key] !== 'undefined';
   }
 }
+
+export default Store
