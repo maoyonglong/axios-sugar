@@ -24,7 +24,7 @@ if (isProd) {
 }
 
 export default {
-  input: 'src/index.ts',
+  input: 'src/AxiosSugar.ts',
   output,
   plugins
 }

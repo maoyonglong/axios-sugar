@@ -1,3 +1,4 @@
 /node_modules
+/debug
 /package-lock.json
 /rollup.config.js
