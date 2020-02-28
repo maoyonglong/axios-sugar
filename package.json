@@ -8,7 +8,8 @@
     "dev": "set NODE_ENV=development && npx rollup -c rollup.config.js -w",
     "build": "set NODE_ENV=production && npx rollup -c rollup.config.js",
     "es-fix": "npx eslint --fix",
-    "test": "npx mocha --reporter spec --require ts-node/register test/**/*.test.ts"
+    "test": "npx mocha --reporter spec --require ts-node/register test/**/*.test.ts",
+    "publish": "npm publish --registry https://registry.npmjs.org"
   },
   "typings": "types/index.d.ts",
   "author": "maoyonglong",
