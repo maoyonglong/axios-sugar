@@ -1,183 +1,265 @@
 'use strict';
 
-function _interopDefault (ex) { return (ex && (typeof ex === 'object') && 'default' in ex) ? ex['default'] : ex; }
+Object.defineProperty(exports, '__esModule', { value: true });
 
-var axios = _interopDefault(require('axios'));
+function isDef(value) {
+    return typeof value !== 'undefined';
+}
 
-var getCompareSymbol = function (rule, injectProp, config) {
-    if (rule === void 0) { rule = 1; }
-    if (rule === 1) {
-        var conf = JSON.parse(JSON.stringify(config));
-        delete conf.headers;
-        delete conf.timeout;
-        delete conf.transformRequest;
-        delete conf.transformResponse;
-        delete conf.xsrfCookieName;
-        delete conf.xsrfHeaderName;
-        delete conf["X-XSRF-TOKEN"];
-        delete conf.maxContentLength;
-        delete conf[injectProp];
-        return JSON.stringify(conf);
-    }
-    else {
-        return config[injectProp].rid;
-    }
-};
-var compare = (function (rule, injectProp, target, source) {
-    if (rule === void 0) { rule = 1; }
-    var tSymbol = getCompareSymbol(rule, injectProp, target);
-    for (var _i = 0, _a = Object.values(source); _i < _a.length; _i++) {
-        var s = _a[_i];
-        var sSymbol = getCompareSymbol(rule, injectProp, s);
-        if (tSymbol === sSymbol) {
-            return true;
-        }
-    }
-    return false;
-});
-
-var defaultConfig = {
-    resend: false,
-    resendDelay: 200,
-    resendNum: 3,
-    compareRule: 1,
-    store: false
-};
-
-function merge(target) {
-    var source = [];
-    for (var _i = 1; _i < arguments.length; _i++) {
-        source[_i - 1] = arguments[_i];
-    }
-    var t = JSON.parse(JSON.stringify(target));
-    source.forEach(function (s) {
-        for (var _i = 0, _a = Object.keys(s); _i < _a.length; _i++) {
+var AxiosSugarConfig = (function () {
+    function AxiosSugarConfig(options) {
+        this.isResend = false;
+        this.resendDelay = 1000;
+        this.resendTimes = 3;
+        this.isSave = false;
+        this.prop = 'custom';
+        options = options || {};
+        for (var _i = 0, _a = Object.keys(options); _i < _a.length; _i++) {
             var key = _a[_i];
-            t[key] = s[key];
-        }
-    });
-    return t;
-}
-function capitalize(str) {
-    return str.substring(0, 1).toUpperCase() + str.substring(1);
-}
-
-var Store = {
-    data: {},
-    save: function (symbol, res) {
-        this.data[symbol] = res;
-    },
-    get: function (symbol) {
-        return this.data[symbol];
-    },
-    contains: function (key) {
-        return typeof this.data[key] !== 'undefined';
-    }
-};
-
-var axiosSugar = {
-    requestConfigs: [],
-    config: defaultConfig,
-    axiosInstance: null,
-    injectProp: "reqConf",
-    clear: function () {
-        var _this = this;
-        this.requestConfigs.forEach(function (c) {
-            c[_this.injectProp].cancelTokenSource.cancel();
-        });
-    },
-    getStore: function () {
-        return Store;
-    },
-    setConfig: function (config) {
-        this.config = merge(defaultConfig, config);
-    },
-    injectReqConfig: function (reqConfig) {
-        var resend = this.config.resend;
-        var injectProp = this.injectProp;
-        if (resend && !reqConfig[injectProp].resendCount) {
-            reqConfig[injectProp].resendCount = 0;
-        }
-        reqConfig[injectProp].cancelTokenSource = axios.CancelToken.source();
-        return reqConfig;
-    },
-    beforeRequest: function () {
-        var _this = this;
-        axios.interceptors.request.use(function (config) {
-            var _a = _this.config, compareRule = _a.compareRule, store = _a.store;
-            var injectProp = _this.injectProp;
-            config[injectProp] = config[injectProp] || {};
-            if (store) {
-                var symbol = getCompareSymbol(compareRule, injectProp, config);
-                var saved = Store.contains(symbol);
-                if (saved) {
-                    return Promise.reject({
-                        reason: "saved",
-                        message: "this request has been saved.",
-                        res: Store.get(symbol)
-                    });
-                }
-            }
-            var existed = compare(compareRule, injectProp, config, _this.requestConfigs);
-            if (existed) {
-                return Promise.reject({
-                    reason: "existed",
-                    message: "a same request has been already sent, waiting for response."
-                });
+            if (isDef(key)) {
+                this[key] = options[key];
             }
             else {
-                config = _this.injectReqConfig(config);
-                _this.requestConfigs.push(config);
-                return Promise.resolve(config);
+                console.error("[axios sugar]: the option " + key + " is not valid.");
             }
-        }, function (err) {
-            Promise.reject(err);
+        }
+    }
+    return AxiosSugarConfig;
+}());
+
+var AxiosSugarInnerStorage = (function () {
+    function AxiosSugarInnerStorage() {
+        this.data = {};
+    }
+    AxiosSugarInnerStorage.prototype.set = function (symbol, res) {
+        this.data[symbol] = res;
+    };
+    AxiosSugarInnerStorage.prototype.get = function (symbol) {
+        return this.data[symbol] || null;
+    };
+    AxiosSugarInnerStorage.prototype.contains = function (symbol) {
+        return typeof this.data[symbol] !== 'undefined';
+    };
+    return AxiosSugarInnerStorage;
+}());
+var AxiosSugarLocalStorage = (function () {
+    function AxiosSugarLocalStorage() {
+    }
+    AxiosSugarLocalStorage.prototype.set = function (symbol, res) {
+        try {
+            localStorage.setItem(symbol, JSON.stringify(res));
+        }
+        catch (err) {
+            console.error("[axios-sugar]: " + err.message);
+        }
+    };
+    AxiosSugarLocalStorage.prototype.get = function (symbol) {
+        var data = localStorage.getItem(symbol);
+        return data === null ? null : JSON.parse(data);
+    };
+    AxiosSugarLocalStorage.prototype.contains = function (symbol) {
+        return this.get(symbol) !== null;
+    };
+    return AxiosSugarLocalStorage;
+}());
+
+var AxiosSugarRequestStack = (function () {
+    function AxiosSugarRequestStack() {
+        this.confs = [];
+    }
+    AxiosSugarRequestStack.prototype.push = function (conf) {
+        this.confs.push(conf);
+    };
+    AxiosSugarRequestStack.prototype.contains = function (conf) {
+        return this.confs.indexOf(conf) >= 0;
+    };
+    AxiosSugarRequestStack.prototype.remove = function (conf) {
+        var confs = this.confs;
+        return confs.splice(confs.indexOf(conf), 1);
+    };
+    AxiosSugarRequestStack.prototype.forEach = function (cb) {
+        this.confs.forEach(function (conf, confIdx, thisArg) {
+            cb.call(conf, conf, confIdx, thisArg);
         });
-    },
-    beforeResponse: function () {
-        axios.interceptors.response.use(this.beforeSuccess.bind(this), this.beforeError.bind(this));
-    },
-    beforeSuccess: function (res) {
-        var _a = this.config, compareRule = _a.compareRule, store = _a.store;
-        var requestConfigs = this.requestConfigs;
-        var reqConfig = res.config;
-        var symbol = getCompareSymbol(compareRule, this.injectProp, reqConfig);
-        var confIdx = requestConfigs.indexOf(reqConfig);
-        requestConfigs.splice(confIdx, 1);
-        if (store) {
-            var existed = Store.contains(symbol);
-            if (!existed) {
-                Store.save(symbol, res);
+    };
+    return AxiosSugarRequestStack;
+}());
+
+function genSymbol(config) {
+    var method = config.method, url = config.url;
+    var data;
+    switch (method) {
+        case 'get':
+            data = '';
+            if (/\?/.test(url)) {
+                var part = url.split('?');
+                url = part[0];
+                data += part[1];
+            }
+            if (config.params) {
+                for (var _i = 0, _a = Object.entries(config.params); _i < _a.length; _i++) {
+                    var _b = _a[_i], key = _b[0], val = _b[1];
+                    if (data !== '')
+                        data += '&';
+                    data += key + "=" + val;
+                }
+            }
+            break;
+        case 'post':
+            data = JSON.stringify(config.data);
+            break;
+    }
+    return "method=" + method + "&url=" + url + "&data=" + data;
+}
+function notUndef(targetVal, defaultVal) {
+    return typeof targetVal === 'undefined' ? defaultVal : targetVal;
+}
+
+function responseInterceptors (sugar, stack) {
+    var axios = sugar.axios;
+    var storage = sugar.storage;
+    var conf = sugar.config;
+    var lifecycle = sugar.lifecycle;
+    var error;
+    axios.interceptors.response.use(function (res) {
+        var config = res.config;
+        var resData = res.data;
+        var cycleRes = lifecycle.beforeResponse(res);
+        if (!cycleRes.state) {
+            error = { reason: 'beforeResponseBreack', message: cycleRes.message };
+            return Promise.reject(error);
+        }
+        var custom = config.custom;
+        var isSave;
+        if (custom) {
+            isSave = notUndef(custom.isSave, conf.isSave);
+        }
+        if (isSave) {
+            var symbol = genSymbol(config);
+            storage.set(symbol, resData);
+        }
+        return Promise.resolve(resData);
+    }, function (err) {
+        var reason = err.reason;
+        if (reason) {
+            switch (reason) {
+                case 'existed':
+                    return;
+                case 'saved':
+                    return Promise.resolve(err.data);
+                case 'beforeRequestBreak':
+                case 'beforeResponseBreak':
+                    return Promise.reject(err.message);
             }
         }
-        return Promise.resolve(res);
-    },
-    beforeError: function (err) {
-        if (err.reason) {
-            this['on' + capitalize(err.reason)].call(this, err);
-            return;
-        }
-        var _a = this.config, resend = _a.resend, resendDelay = _a.resendDelay, resendNum = _a.resendNum;
-        var reqConfig = err.response.config;
-        var axiosInstance = this.axiosInstance || axios;
-        var requestConfigs = this.requestConfigs;
-        var confIdx = requestConfigs.indexOf(reqConfig);
-        requestConfigs.splice(confIdx, 1);
-        if (resend && reqConfig[this.injectProp].resendCount < resendNum) {
-            reqConfig[this.injectProp].resendCount++;
-            setTimeout(function () {
-                axiosInstance.request(reqConfig);
-            }, resendDelay);
+        var config = err.config;
+        if (config) {
+            stack.remove(config);
+            var custom_1 = config[conf.prop];
+            var isResend = conf.isResend, resendDelay = conf.resendDelay, resendTimes = conf.resendTimes, curResendTimes_1 = 0;
+            if (custom_1) {
+                isResend = notUndef(custom_1.isResend, isResend);
+                resendDelay = notUndef(custom_1.resendDelay, resendDelay);
+                resendTimes = notUndef(custom_1.resendTimes, resendTimes);
+                curResendTimes_1 = notUndef(custom_1.curResendTimes, 0);
+            }
+            if (isResend && curResendTimes_1 < resendTimes) {
+                setTimeout(function () {
+                    if (!custom_1) {
+                        config.custom = {};
+                    }
+                    config.custom.curResendTimes = ++curResendTimes_1;
+                    axios.request(config);
+                }, resendDelay);
+                error = { reason: 'timeout', message: "current resend times is " + curResendTimes_1 + "." };
+                return Promise.reject(error);
+            }
+            else {
+                return Promise.reject(err);
+            }
         }
         return Promise.reject(err);
-    }
-};
-["Saved", "Existed"].forEach(function (reason) {
-    axiosSugar['on' + reason] = function (err) {
-        console.log("[No Send]: " + err.reason + " - " + err.message);
-    };
-});
-axiosSugar.beforeRequest.bind(axiosSugar)();
-axiosSugar.beforeResponse.bind(axiosSugar)();
+    });
+}
 
-module.exports = axiosSugar;
+function requestInterceptors (sugar, stack) {
+    var axios = sugar.axios;
+    var storage = sugar.storage;
+    var conf = sugar.config;
+    var lifecycle = sugar.lifecycle;
+    var error;
+    axios.interceptors.request.use(function (config) {
+        if (stack.contains(config)) {
+            error = { reason: 'existed' };
+            return Promise.reject(error);
+        }
+        var custom = config[conf.prop];
+        var isSave = conf.isSave;
+        if (custom) {
+            isSave = notUndef(custom.isSave, isSave);
+        }
+        if (isSave) {
+            var storageRes = storage.get(genSymbol(config));
+            if (storageRes) {
+                error = { reason: 'saved', data: storageRes };
+                return Promise.reject(error);
+            }
+        }
+        var cycleRes = lifecycle.beforeRequest(config);
+        if (!cycleRes.state) {
+            error = { reason: 'beforeRequestBreak', message: cycleRes.message };
+            return Promise.reject(error);
+        }
+        stack.push(config);
+        return Promise.resolve(config);
+    }, function (err) {
+        Promise.reject(err);
+    });
+}
+
+var AxiosSugarLifeCycle = (function () {
+    function AxiosSugarLifeCycle() {
+    }
+    AxiosSugarLifeCycle.prototype.beforeRequest = function (conf) {
+        return {
+            state: true,
+            message: ''
+        };
+    };
+    AxiosSugarLifeCycle.prototype.beforeResponse = function (res) {
+        return {
+            state: true,
+            message: ''
+        };
+    };
+    return AxiosSugarLifeCycle;
+}());
+
+var AxiosSugar = (function () {
+    function AxiosSugar(axios, options) {
+        var _this = this;
+        if (options === void 0) { options = {}; }
+        this.stack = new AxiosSugarRequestStack();
+        this.config = new AxiosSugarConfig();
+        this.storage = new AxiosSugarInnerStorage();
+        this.lifecycle = new AxiosSugarLifeCycle();
+        this.axios = axios;
+        ['config', 'storage', 'lifecycle'].forEach(function (option) {
+            if (options[option]) {
+                _this[option] = options[option];
+            }
+        });
+        this.init();
+    }
+    AxiosSugar.prototype.init = function () {
+        requestInterceptors(this, this.stack);
+        responseInterceptors(this, this.stack);
+    };
+    return AxiosSugar;
+}());
+
+exports.AxiosSugarConfig = AxiosSugarConfig;
+exports.AxiosSugarInnerStorage = AxiosSugarInnerStorage;
+exports.AxiosSugarLifeCycle = AxiosSugarLifeCycle;
+exports.AxiosSugarLocalStorage = AxiosSugarLocalStorage;
+exports.default = AxiosSugar;

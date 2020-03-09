@@ -9,29 +9,29 @@ let plugins = [
   })
 ]
 
-let output = {
-  file: 'dist/axios-sugar.cjs.js',
-  format: 'cjs',
-}
+let output = [
+  {
+    file: 'dist/axios-sugar.cjs.js',
+    format: 'cjs',
+  },
+  {
+    file: 'dist/axios-sugar.js',
+    format: 'iife',
+    name: 'AxiosSugar'
+  }
+]
 
 if (isProd) {
   plugins = plugins.concat([uglify()])
-  output = [
-    {
-      file: 'dist/axios-sugar.bundle.js',
-      format: 'iife',
-      name: 'axiosSugar'
-    },
-    {
-      file: 'dist/axios-sugar.js',
-      format: 'iife',
-      name: 'axiosSugar'
-    }
-  ]
+  output = {
+    file: 'dist/axios-sugar.bundle.js',
+    format: 'iife',
+    name: 'AxiosSugar'
+  }
 }
 
 export default {
-  input: 'src/AxiosSugar.ts',
+  input: 'src/index.ts',
   output,
   plugins,
   include: ['node_modules/axios/lib/utils.js']

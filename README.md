@@ -1,109 +1,183 @@
 # AxiosSugar
-An axios wrapper, which supports resending, store and so on
+An axios wrapper, which supports resending, storage, cancel repeat request automatically; and so on.
 
 # Usage
 ```js
-// use the aixos static
-import axiosSugar from 'axiosSugar';
-// use an axios instance
-import axios from 'axios';
-import axiosSugar from 'axiosSugar';
+import axios from 'axios'
+import AxiosSugar from 'axios-sugar'
+
+const axiosSugar = new AxiosSugar(axios);
+// or
 const ins = axios.create();
-axiosSugar.axiosInstance = ins;
+const axiosSugar = new AxiosSugar(ins);
 
 // now you can use axios as before
+// current version only support get and post
 axios.get();
 // or 
 ins.get();
 // ...
 ```
 
-# Callback
-You can overrid the callback to achieve some goals, e.g.:
-```js
-axiosSugar.onExisted = function (error) {
-  // `this` is aim to axiosSugar
-  console.log(error.reason); // existed
-}
-```
-The base properties of the error argument is reason and message.
-### onExisted
-The argument of this callback is an error.
-### onSaved
-The argument of this callback is an error, with an additional property `res: AxiosResponse`
-
 # Config
-You can use `setConfig` to change the configure.
 ```js
-axiosSugar.setConfig(conf);
-```
-The conf is:
-```js
-const defaultConfig = {
-  resend: false, // if resend when an exception is encountered
-  resendDelay: 200, // resend delay (setTimeout)
-  resendNum: 3, // resend times
-  compareRule: 1, // rule for judging the same request
-  store: false // if save the requests
-};
-```
+import axios from 'axios'
+import AxiosSugar, { AxiosSugarConfig } from 'axios-sugar'
 
-# Compare Rule
-1: use the `JSON.stringify(AxiosRequestConfig)` as symbol  
-2: use the `rid` as symbol, e.g.:
-```js
-axios.request({
-  url: '',
-  method: '',
-  // the injected property
-  reqConf: {
-    rid: '' // string or number
-  }
+// AxiosSugarConfigOptions
+let options = {
+  isResend: true,
+  isSave: true
+}
+
+const axiosSugar = new AxiosSugar(axios, {
+  config: new AxiosSugarConfig(options)
 });
 ```
-# reqConf
-this is a property injected in each `AxiosRequestConfig`:
+### AxiosSugarConfigOptions
 ```js
 {
-  reqConf: {
-    rid: '', // rid symbol
-    resendCount: 0 // exists if `resend` is true, current resend times
-  }
+  isResend?: boolean; // default: false
+  resendDelay?: number; // default: 1000 (ms)
+  resendTimes?: number; // default: 3
+  isSave?: boolean; // default: false
+  prop?: string; // default: custom to override the options above in a special request
 }
 ```
-You can change the key name
+prop is a property injected in the config of axios:
 ```js
-axiosSugar.injectProp = 'injectProp';
-// now it will be:
-{
-  injectProp: {
-    rid: '', // rid symbol
-    resendCount: 0 // exists if `resend` is true, current resend times
+import axios from 'axios'
+import AxiosSugar, { AxiosSugarConfig } from 'axios-sugar'
+
+// AxiosSugarConfigOptions
+let options = {
+  isResend: true,
+  isSave: true // default to use innerStorage
+}
+
+const axiosSugar = new AxiosSugar(axios, {
+  config: new AxiosSugarConfig(options)
+});
+
+axios.get('/path', {
+  // prop
+  custom: {
+    isSave: false // Now, this request will not be saved.
   }
+})
+axios.get('/path') // This request will be saved
+```
+
+# Storage
+This library supports two way to save the response data`(res.data in axios.then)`.
+### InnerStorage
+This storage will be save the data in a object variable.
+```js
+import axios from 'axios'
+import AxiosSugar, { AxiosSugarInnerStorage } from 'axios-sugar'
+
+let options = {
+  isSave: true // default to use innerStorage
+}
+
+const axiosSugar = new AxiosSugar(axios, {
+  config: new AxiosSugarConfig(options),
+  storage: new AxiosSugarInnerStorage() // storage
+});
+```
+### LocalStorage
+This storage will be save the data in localStorage.
+```js
+import axios from 'axios'
+import AxiosSugar, { AxiosSugarLocalStorage } from 'axios-sugar'
+
+let options = {
+  isSave: true // default to use innerStorage
+}
+
+const axiosSugar = new AxiosSugar(axios, {
+  config: new AxiosSugarConfig(options),
+  storage: new AxiosSugarLocalStorage() // storage
+});
+```
+### Custom Storage
+You can implements the interface AxiosSugarStorage to customize your storage.
+// The interface is:
+```ts
+interface AxiosSugarStorage {
+  set (symbol: string, res: any): void;
+  get (symbol: string): any;
+  contains (symbol: string): boolean;
+}
+```
+// custom:
+```js
+import axios from 'axios'
+import AxiosSugar from 'axios-sugar'
+
+let options = {
+  isSave: true // default to use innerStorage
+}
+
+// override set, get and contains methods
+class CustomStorage {
+  // symbol is a string to identify a request, res is `res.data in axios.then`
+  set (symbol: string, res: any);
+  get (symbol: string);
+  contains (symbol: string);
+}
+
+const axiosSugar = new AxiosSugar(axios, {
+  config: new AxiosSugarConfig(options),
+  storage: new CustomStorage() // storage
+});
+```
+
+# Lifecycle
+The lifecycle is some callback.
+```js
+import axios from 'axios'
+import AxiosSugar, { AxiosSugarLifeCycle } from 'axios-sugar'
+
+let cycle = new AxiosSugarLifeCycle();
+// now, you can override some callback
+cycle.beforeRequest = (conf) => {
+  return false // This will break the request
+}
+```
+### callback
+The callback of lifecycle is:
+```ts
+beforeRequest(conf: AxiosRequestConfig): AxiosSugarLifeCycleResult;
+// carefully, this res is the `res` not `res.data`
+beforeResponse(res: AxiosResponse): AxiosSugarLifeCycleResult;
+```
+All callback should return an AxiosSugarLifeCycleResult, it is a object:
+```ts
+{
+  state: false, // will break execution and throw an AxiosSugarError if state is false
+  message: '', // error message
+}
+```
+### AxiosSugarError
+The AxiosSugarError is:
+```ts
+{
+  reason: string; // error reason
+  message?: any;
+  data?: any;
 }
 ```
 
-# Store
-In default, Store will save the response in an object variable:
-```js
-{
-  // request symbol: response
-  symbol: response
-}
+# Test
+**Node test**:
 ```
-The Store is an single object, you can override this Store's function`(save, get, contains)` to customize:
-```js
-{
-  data: {},
-  // when a request to be saved, it will be call
-  save (symbol: csymbol, res: AxiosResponse) {
-    this.data[symbol] = res;
-  },
-  get (symbol: csymbol): any {
-    return this.data[symbol];
-  },
-  contains (key): boolean {
-    return typeof this.data[key] !== 'undefined';
-  }
-}
+npm test
 ```
+**Some browser test**`(e.g. AxiosSugarLocalStorage)`:  
+open the corresponding `index.html` File in `/test` which built by mocha.
+
+# TODO
+* support other axios method
+* Broken network retransmission
+* Broken network lifecycle
