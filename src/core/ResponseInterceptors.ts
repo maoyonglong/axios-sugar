@@ -24,6 +24,10 @@ export default function (
       return Promise.reject(error);
     }
 
+    if (config) {
+      stack.remove(config);
+    }
+
     // get custom option
     const custom = config.custom;
     let isSave;

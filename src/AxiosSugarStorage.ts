@@ -7,8 +7,6 @@ export interface AxiosSugarStorage {
   contains (symbol: string): boolean;
 }
 
-let a = new Array()
-
 export class AxiosSugarInnerStorage implements AxiosSugarStorage {
   data: {[key: string]: any} = {};
   set (symbol: string, res: any) {
