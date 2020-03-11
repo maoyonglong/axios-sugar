@@ -100,7 +100,7 @@ var AxiosSugar = (function (exports) {
   var isBrowser = window !== undefined;
   if (!isBrowser) {
     /* eslint-disable global-require */
-    var { Buffer } = require('buffer');
+    var Buffer = require('buffer').Buffer;
   }
 
   function sizeOfObject (seen, object) {
