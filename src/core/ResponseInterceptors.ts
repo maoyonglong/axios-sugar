@@ -7,7 +7,7 @@ import { isStr } from '../utils';
 export default function (
   sugar: AxiosSugar,
   stack: AxiosSugarRequestStack
-) {
+): void {
   const axios = sugar.axios;
   const storage = sugar.storage;
   const conf = sugar.config;
@@ -18,7 +18,7 @@ export default function (
     const config = res.config;
     const resData = res.data;
 
-    let cycleRes = lifecycle.beforeResponse(res);
+    const cycleRes = lifecycle.beforeResponse(res);
     if (!cycleRes.state) {
       error = { reason: 'beforeResponseBreack', message: cycleRes.message };
       return Promise.reject(error);
@@ -75,7 +75,7 @@ export default function (
               if (isStr(config.data)) {
                 config.data = JSON.parse(config.data);
               }
-              return resolve(axios.request(config))
+              return resolve(axios.request(config));
             }, resendDelay);
           });
         } else {

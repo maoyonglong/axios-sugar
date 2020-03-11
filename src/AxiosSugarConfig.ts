@@ -9,14 +9,14 @@ export interface AxiosSugarConfigOptions {
 }
 
 export default class AxiosSugarConfig {
-  isResend: boolean = false;
-  resendDelay: number = 1000;
-  resendTimes: number = 3;
-  isSave: boolean = false;
-  prop: string = 'custom';
+  isResend = false;
+  resendDelay = 1000;
+  resendTimes = 3;
+  isSave = false;
+  prop = 'custom';
   constructor (options?: AxiosSugarConfigOptions) {
     options = options || {}
-    for (let key of Object.keys(options)) {
+    for (const key of Object.keys(options)) {
       if (isDef(key)) {
         this[key] = options[key]
       } else {
@@ -24,4 +24,4 @@ export default class AxiosSugarConfig {
       }
     }
   }
-};
+}

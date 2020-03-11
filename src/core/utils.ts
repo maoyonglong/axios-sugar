@@ -3,12 +3,12 @@ import { isDef } from '../utils';
 
 // where the sending data in ? (params or data)
 function sendDataWay (method: string): 'data' | 'params' | 'both' {
-  let isInData = ['post', 'put', 'patch'].indexOf(method) >= 0,
+  const isInData = ['post', 'put', 'patch'].indexOf(method) >= 0,
     isInParams = method === 'get';
   return isInData ? 'data' : (isInParams ? 'params' : 'both');
 }
 
-export function normalizeProp (config: AxiosRequestConfig, prop: string = 'custom'): AxiosRequestConfig {
+export function normalizeProp (config: AxiosRequestConfig, prop = 'custom'): AxiosRequestConfig {
   // if custom prop in data
   if (sendDataWay(config.method) === 'data' && config.data) {
     const propVal = config.data[prop];
@@ -20,20 +20,21 @@ export function normalizeProp (config: AxiosRequestConfig, prop: string = 'custo
   return config;
 }
 
-export function genSymbol (config: AxiosRequestConfig) {
-  let { method, url } = config
+export function genSymbol (config: AxiosRequestConfig): string {
+  let { url } = config;
+  const { method } = config;
   // the data send before
   let data;
 
   function getParamsSymbolData (params: object): string {
-    let data = ''
+    let data = '';
     if (/\?/.test(url)) {
       const part = url.split('?');
       url = part[0];
       data += part[1];
     }
     if (params) {
-      for (let [key, val] of Object.entries(params)) {
+      for (const [key, val] of Object.entries(params)) {
         if (data !== '') data += '&';
         data += `${key}=${val}`;
       }
@@ -49,10 +50,10 @@ export function genSymbol (config: AxiosRequestConfig) {
   switch (sendDataWay(method)) {
     case 'params':
       data = getParamsSymbolData(config.params);
-      break
+      break;
     case 'data':
       data = getDataSymbolData(config.data);
-      break
+      break;
     case 'both':
       data = getParamsSymbolData(config.params) || getDataSymbolData(config.params);
   }

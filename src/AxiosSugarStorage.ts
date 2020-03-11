@@ -1,11 +1,13 @@
 import { getDurationMS, isDef } from './utils';
-import sizeof from './vendor/object-sizeof';
+import sizeof from './vendor/object-sizeof'
 
 export interface AxiosSugarStorage {
   set (symbol: string, res: any): void;
   get (symbol: string): any;
   contains (symbol: string): boolean;
 }
+
+let a = new Array()
 
 export class AxiosSugarInnerStorage implements AxiosSugarStorage {
   data: {[key: string]: any} = {};
@@ -32,7 +34,7 @@ export class AxiosSugarInnerReleaseStorage extends AxiosSugarInnerStorage {
   }
   set (symbol: string, res: any) {
     let data = this.data;
-    for (let [key, item] of Object.entries(data)) {
+    for (const [key, item] of Object.entries(data)) {
       if (getDurationMS(new Date().getTime(), item.time) >= this.duration) {
         delete data[key];
       }
@@ -60,7 +62,7 @@ export class AxiosSugarLocalStorage implements AxiosSugarStorage {
     }
   }
   get (symbol: string) {
-    let data = localStorage.getItem(symbol)
+    const data = localStorage.getItem(symbol)
 
     return data === null ? null : JSON.parse(data)
   }

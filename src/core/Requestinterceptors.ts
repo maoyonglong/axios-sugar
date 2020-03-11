@@ -6,7 +6,7 @@ import { AxiosSugarError } from './SugarError';
 export default function (
   sugar: AxiosSugar,
   stack: AxiosSugarRequestStack
-) {
+): void {
   const axios = sugar.axios;
   const storage = sugar.storage;
   const conf = sugar.config;

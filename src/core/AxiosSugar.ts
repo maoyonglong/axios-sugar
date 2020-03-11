@@ -27,7 +27,7 @@ export default class AxiosSugar {
     });
     this.init();
   }
-  private init () {
+  private init (): void {
     requestInterceptors(this, this.stack);
     responseInterceptors(this, this.stack);
   }
