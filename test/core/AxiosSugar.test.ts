@@ -58,24 +58,38 @@ axiosSugar = new AxiosSugar(ins, {
   })
 });
 
-mock.onGet('/timeout').timeout();
+let times = -1;
+let timeoutOnce = true;
+mock.onPost('/timeout').reply(() => {
+  times++;
+  if (!timeoutOnce) return [404, {}];
+  return times === 0 ? [404, {}] : [200, {code: 0}];
+});
 
 it('resend', () => {
-  let currentResendTimes = 0
+  // let currentResendTimes = 0
   ins
-    .get('/timeout')
-    .catch(error => {
-      expect(error.reason).to.eq('timeout');
-      expect(error.message).to.eq(`current resend times is ${currentResendTimes}.`);
-      currentResendTimes++;
-    });
+    .post('/timeout', {
+      data: 1,
+      isResend: true
+    })
+    .then(resData => {
+      expect(resData).to.eql({code: 0});
+    })
+    .then(() => {
+      timeoutOnce = false;
+      ins.post('/timeout')
+        .catch(err => {
+          expect(err.reason).to.eq('resendEnd');
+        })
+    })
 });
 
 it('save', () => {
   axiosSugar.config = new AxiosSugarConfig({
     isSave: true
   });
-  let resTimes = 0
+  let resTimes = 0;
   function saveGetUsers (times) {
     ins
     .get('/users')

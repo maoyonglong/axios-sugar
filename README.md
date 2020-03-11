@@ -12,7 +12,6 @@ const ins = axios.create();
 const axiosSugar = new AxiosSugar(ins);
 
 // now you can use axios as before
-// current version only support get and post
 axios.get();
 // or 
 ins.get();
@@ -85,6 +84,29 @@ const axiosSugar = new AxiosSugar(axios, {
   storage: new AxiosSugarInnerStorage() // storage
 });
 ```
+### InnerReleaseStorage
+Unlike InnerStorage, it can automatically free up memory.
+```js
+import axios from 'axios'
+import AxiosSugar, { AxiosSugarInnerReleaseStorage } from 'axios-sugar'
+
+let options = {
+  isSave: true // default to use innerStorage
+}
+
+const axiosSugar = new AxiosSugar(axios, {
+  config: new AxiosSugarConfig(options),
+  storage: new AxiosSugarInnerReleaseStorage() // storage
+});
+// the constructor of AxiosSugarInnerReleaseStorage is:
+/**
+ * duration: storage time (ms)  default is 5 * 60 * 1000 (i.e. 5 minutes)
+ * limit: memory limit (Bytes) default is 15 * 1024 * 1024 (i.e. 15MB)
+ * constructor (duration: number, limit: number); 
+ * /
+```
+
+
 ### LocalStorage
 This storage will be save the data in localStorage.
 ```js
@@ -144,6 +166,10 @@ let cycle = new AxiosSugarLifeCycle();
 cycle.beforeRequest = (conf) => {
   return false // This will break the request
 }
+
+const axiosSugar = new AxiosSugar(axios, {
+  lifecycle: cycle
+})
 ```
 ### callback
 The callback of lifecycle is:
@@ -178,6 +204,5 @@ npm test
 open the corresponding `index.html` File in `/test` which built by mocha.
 
 # TODO
-* support other axios method
 * Broken network retransmission
 * Broken network lifecycle

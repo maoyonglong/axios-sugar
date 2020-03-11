@@ -1,4 +1,4 @@
-const storage = new axiosSugar.AxiosSugarInnerStorage();
+const storage = new AxiosSugar.AxiosSugarInnerStorage();
 const expect = chai.expect;
 
 it('inner:set', () => {
@@ -15,7 +15,7 @@ it('inner:contains', () => {
   expect(storage.contains('first')).to.true;
 });
 
-const storage2 = new axiosSugar.AxiosSugarLocalStorage();
+const storage2 = new AxiosSugar.AxiosSugarLocalStorage();
 
 it('local:set', () => {
   storage2.set('first', 1);
@@ -29,4 +29,22 @@ it('local:get', () => {
 
 it('local:contains', () => {
   expect(storage2.contains('first')).to.true;
+});
+
+it('innerRelease:duration', () => {
+  const s1 = new AxiosSugar.AxiosSugarInnerReleaseStorage(0);
+  s1.set('first', 1);
+  expect(s1.get('first')).to.eq(1);
+  s1.set('second', 2);
+  expect(s1.get('first')).to.null;
+  expect(s1.get('second')).to.eq(2);
+});
+
+it('innerRelease:limit', () => {
+  const s1 = new AxiosSugar.AxiosSugarInnerReleaseStorage(undefined, 1);
+  s1.set('first', 1);
+  expect(s1.get('first')).to.eq(1);
+  s1.set('second', 2);
+  expect(s1.get('first')).to.null;
+  expect(s1.get('second')).to.eq(2);
 });

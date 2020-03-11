@@ -2,6 +2,7 @@ import AxiosSugar from './AxiosSugar';
 import AxiosSugarRequestStack from '../RequestStack';
 import { notUndef, genSymbol } from './utils';
 import { AxiosSugarError } from './SugarError';
+import { isStr } from '../utils';
 
 export default function (
   sugar: AxiosSugar,
@@ -40,16 +41,9 @@ export default function (
   }, err => {
     // if AxiosSugarError
     const reason = err.reason;
+
     if (reason) {
-      switch (reason) {
-        case 'existed':
-          return;
-        case 'saved':
-          return Promise.resolve(err.data);
-        case 'beforeRequestBreak':
-        case 'beforeResponseBreak':
-          return Promise.reject(err.message);
-      }
+      return reason === 'saved' ? Promise.resolve(err.data) : Promise.reject(err);
     }
 
     const config = err.config;
@@ -70,22 +64,27 @@ export default function (
         resendTimes = notUndef(custom.resendTimes, resendTimes);
         curResendTimes = notUndef(custom.curResendTimes, 0);
       }
-
-      if (isResend && curResendTimes < resendTimes) {
-        setTimeout(() => {
-          if (!custom) {
-            config.custom = {};
-          }
-          config.custom.curResendTimes = ++curResendTimes;
-          axios.request(config);
-        }, resendDelay);
-        error = {reason: 'timeout', message: `current resend times is ${curResendTimes}.`};
-        return Promise.reject(error);
+      if (isResend) {
+        if (curResendTimes < resendTimes) {
+          return new Promise(resolve => {
+            setTimeout(() => {
+              if (!custom) {
+                config.custom = {};
+              }
+              config.custom.curResendTimes = ++curResendTimes;
+              if (isStr(config.data)) {
+                config.data = JSON.parse(config.data);
+              }
+              return resolve(axios.request(config))
+            }, resendDelay);
+          });
+        } else {
+          error = {reason: 'resendEnd', message: `Can't get a response.`};
+          return Promise.reject(error);
+        }
       } else {
         return Promise.reject(err);
       }
     }
-
-    return Promise.reject(err);
   });
 }

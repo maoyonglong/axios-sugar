@@ -1,5 +1,5 @@
-import AxiosSugarRequestStack from "../RequestStack"
-import { genSymbol, notUndef } from './utils';
+import AxiosSugarRequestStack from "../RequestStack";
+import { genSymbol, notUndef, normalizeProp } from './utils';
 import AxiosSugar from "./AxiosSugar";
 import { AxiosSugarError } from './SugarError';
 
@@ -14,6 +14,7 @@ export default function (
   let error: AxiosSugarError | Error;
 
   axios.interceptors.request.use(config => {
+    config = normalizeProp(config, conf.prop);
 
     if (stack.contains(config)) {
       error = { reason: 'existed' };

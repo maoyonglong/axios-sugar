@@ -1,3 +1,6 @@
+import { getDurationMS, isDef } from './utils';
+import sizeof from './vendor/object-sizeof';
+
 export interface AxiosSugarStorage {
   set (symbol: string, res: any): void;
   get (symbol: string): any;
@@ -5,7 +8,7 @@ export interface AxiosSugarStorage {
 }
 
 export class AxiosSugarInnerStorage implements AxiosSugarStorage {
-  data= {};
+  data: {[key: string]: any} = {};
   set (symbol: string, res: any) {
     this.data[symbol] = res;
   }
@@ -14,6 +17,37 @@ export class AxiosSugarInnerStorage implements AxiosSugarStorage {
   }
   contains (symbol: string): boolean {
     return typeof this.data[symbol] !== 'undefined';
+  }
+}
+
+export class AxiosSugarInnerReleaseStorage extends AxiosSugarInnerStorage {
+  // save time
+  duration: number = 5 * 60 * 1000; // 5 minutes
+  // volume limit
+  limit: number = 15 * 1024 * 1024; // 15MB
+  constructor (duration: number, limit: number) {
+    super();
+    if (isDef(duration)) this.duration = duration;
+    if (isDef(limit)) this.limit = limit;
+  }
+  set (symbol: string, res: any) {
+    let data = this.data;
+    for (let [key, item] of Object.entries(data)) {
+      if (getDurationMS(new Date().getTime(), item.time) >= this.duration) {
+        delete data[key];
+      }
+    }
+    if (sizeof(res) + sizeof(data) > this.limit) {
+      data = this.data = {};
+    }
+    data[symbol] = {
+      data: res,
+      time: new Date().getTime()
+    };
+  }
+  get (symbol: string): any {
+    const target = this.data[symbol];
+    return target ? target.data : null;
   }
 }
 
