@@ -16,10 +16,10 @@ axios.interceptors.request.use(config => {
 });
 
 // send params methods
-const get = () => axios.get('/', {
+const get = () => axios.get('/', ({
   params: sendData,
   custom
-});
+} as any));
 
 // send data methods
 const dataMethods = {};
@@ -28,7 +28,7 @@ dataMethodsArr.forEach(method => {
   dataMethods[method] = () => axios[method]('/', {
     ...sendData,
     custom
-  })
+  });
 });
 
 // send both methods
