@@ -1,3 +1,7 @@
+![Travis (.org)](https://img.shields.io/travis/maoyonglong/axios-sugar)
+![Coveralls github](https://img.shields.io/coveralls/github/maoyonglong/axios-sugar)
+![version](https://img.shields.io/npm/v/axios-sugar)
+![download](https://img.shields.io/npm/dm/axios-sugar)
 ![license](https://img.shields.io/badge/license-MIT-brightgreen)
 
 # AxiosSugar

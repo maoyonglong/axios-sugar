@@ -61,114 +61,70 @@ var AxiosSugar = (function (exports) {
       d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
   }
 
-  /**
-   * The MIT License (MIT)
-   * 
-   * Copyright © 2014, Andrei Karpushonak aka @miktam
-   * 
-   * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
-   * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-   * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-   * *******************************
-   * The MIT License applies to vendor/object-sizeof folder only.
-   * *******************************
-   */
-  /**
-   * Byte sizes are taken from ECMAScript Language Specification
-   * http://www.ecma-international.org/ecma-262/5.1/
-   * http://bclary.com/2004/11/07/#a-4.3.16
-   */
-
   var ECMA_SIZES = {
-    STRING: 2,
-    BOOLEAN: 4,
-    NUMBER: 8
+      STRING: 2,
+      BOOLEAN: 4,
+      NUMBER: 8
   };
 
-  /**
-   * The MIT License (MIT)
-   * 
-   * Copyright © 2014, Andrei Karpushonak aka @miktam
-   * 
-   * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
-   * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-   * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-   * *******************************
-   * The MIT License applies to vendor/object-sizeof folder only.
-   * *******************************
-   */
-  var isBrowser = window !== undefined;
+  var isBrowser = typeof window !== 'undefined';
+  var Buffer;
   if (!isBrowser) {
-    /* eslint-disable global-require */
-    var Buffer = require('buffer').Buffer;
+      Buffer = require('buffer').Buffer;
   }
-
-  function sizeOfObject (seen, object) {
-    if (object == null) {
-      return 0
-    }
-
-    var bytes = 0;
-    for (var key in object) {
-      // Do not recalculate circular references
-      if (typeof object[key] === 'object' && object[key] !== null) {
-        if (seen.has(object[key])) {
-          continue
-        }
-        seen.add(object[key]);
+  function sizeOfObject(seen, object) {
+      if (object == null) {
+          return 0;
       }
-
-      bytes += getCalculator(seen)(key);
-      try {
-        bytes += getCalculator(seen)(object[key]);
-      } catch (ex) {
-        if (ex instanceof RangeError) {
-          // circular reference detected, final result might be incorrect
-          // let's be nice and not throw an exception
-          bytes = 0;
-        }
-      }
-    }
-
-    return bytes
-  }
-
-  function getCalculator (seen) {
-    return function (object) {
-      if (!isBrowser && Buffer.isBuffer(object)) {
-        return object.length
-      }
-
-      var objectType = typeof (object);
-      switch (objectType) {
-        case 'string':
-          return object.length * ECMA_SIZES.STRING
-        case 'boolean':
-          return ECMA_SIZES.BOOLEAN
-        case 'number':
-          return ECMA_SIZES.NUMBER
-        case 'object':
-          if (Array.isArray(object)) {
-            return object.map(getCalculator(seen)).reduce(function (acc, curr) {
-              return acc + curr
-            }, 0)
-          } else {
-            return sizeOfObject(seen, object)
+      var bytes = 0;
+      for (var key in object) {
+          if (typeof object[key] === 'object' && object[key] !== null) {
+              if (seen.has(object[key])) {
+                  continue;
+              }
+              seen.add(object[key]);
           }
-        default:
-          return 0
+          bytes += getCalculator(seen)(key);
+          try {
+              bytes += getCalculator(seen)(object[key]);
+          }
+          catch (ex) {
+              if (ex instanceof RangeError) {
+                  bytes = 0;
+              }
+          }
       }
-    }
+      return bytes;
   }
-
-  /**
-   * Main module's entry point
-   * Calculates Bytes for the provided parameter
-   * @param object - handles object/string/boolean/buffer
-   * @returns {*}
-   */
-  function sizeof (object) {
-    return getCalculator(new WeakSet())(object)
+  function getCalculator(seen) {
+      return function (object) {
+          if (!isBrowser && Buffer.isBuffer(object)) {
+              return object.length;
+          }
+          var objectType = typeof (object);
+          switch (objectType) {
+              case 'string':
+                  return object.length * ECMA_SIZES.STRING;
+              case 'boolean':
+                  return ECMA_SIZES.BOOLEAN;
+              case 'number':
+                  return ECMA_SIZES.NUMBER;
+              case 'object':
+                  if (Array.isArray(object)) {
+                      return object.map(getCalculator(seen)).reduce(function (acc, curr) {
+                          return acc + curr;
+                      }, 0);
+                  }
+                  else {
+                      return sizeOfObject(seen, object);
+                  }
+              default:
+                  return 0;
+          }
+      };
+  }
+  function sizeof(object) {
+      return getCalculator(new WeakSet())(object);
   }
 
   var AxiosSugarInnerStorage = (function () {
@@ -241,27 +197,46 @@ var AxiosSugar = (function (exports) {
       return AxiosSugarLocalStorage;
   }());
 
-  var AxiosSugarRequestStack = (function () {
-      function AxiosSugarRequestStack() {
-          this.confs = [];
+  var Stack = (function () {
+      function Stack() {
+          this.stack = [];
       }
-      AxiosSugarRequestStack.prototype.push = function (conf) {
-          this.confs.push(conf);
+      Stack.prototype.push = function (el) {
+          return this.stack.push(el);
       };
-      AxiosSugarRequestStack.prototype.contains = function (conf) {
-          return this.confs.indexOf(conf) >= 0;
+      Stack.prototype.pop = function () {
+          return this.stack.pop();
       };
-      AxiosSugarRequestStack.prototype.remove = function (conf) {
-          var confs = this.confs;
-          return confs.splice(confs.indexOf(conf), 1);
+      Stack.prototype.contains = function (el) {
+          return this.stack.indexOf(el) >= 0;
       };
+      Stack.prototype.remove = function (el) {
+          return this.stack.splice(this.indexOf(el), 1)[0];
+      };
+      Stack.prototype.indexOf = function (el) {
+          return this.stack.indexOf(el);
+      };
+      return Stack;
+  }());
+  var AxiosSugarRequestStack = (function (_super) {
+      __extends(AxiosSugarRequestStack, _super);
+      function AxiosSugarRequestStack() {
+          return _super !== null && _super.apply(this, arguments) || this;
+      }
       AxiosSugarRequestStack.prototype.forEach = function (cb) {
-          this.confs.forEach(function (conf, confIdx, thisArg) {
+          this.stack.forEach(function (conf, confIdx, thisArg) {
               cb.call(conf, conf, confIdx, thisArg);
           });
       };
       return AxiosSugarRequestStack;
-  }());
+  }(Stack));
+  var AxiosStack = (function (_super) {
+      __extends(AxiosStack, _super);
+      function AxiosStack() {
+          return _super !== null && _super.apply(this, arguments) || this;
+      }
+      return AxiosStack;
+  }(Stack));
 
   function sendDataWay(method) {
       var isInData = ['post', 'put', 'patch'].indexOf(method) >= 0, isInParams = method === 'get';
@@ -279,7 +254,8 @@ var AxiosSugar = (function (exports) {
       return config;
   }
   function genSymbol(config) {
-      var method = config.method, url = config.url;
+      var url = config.url;
+      var method = config.method;
       var data;
       function getParamsSymbolData(params) {
           var data = '';
@@ -328,8 +304,11 @@ var AxiosSugar = (function (exports) {
           var resData = res.data;
           var cycleRes = lifecycle.beforeResponse(res);
           if (!cycleRes.state) {
-              error = { reason: 'beforeResponseBreack', message: cycleRes.message };
+              error = { reason: 'beforeResponseBreak', message: cycleRes.message };
               return Promise.reject(error);
+          }
+          if (config) {
+              stack.remove(config);
           }
           var custom = config.custom;
           var isSave;
@@ -460,13 +439,24 @@ var AxiosSugar = (function (exports) {
       };
       return AxiosSugar;
   }());
+  var usedAxios = new AxiosStack();
+  function factory(axios, options) {
+      if (options === void 0) { options = {}; }
+      if (usedAxios.contains(axios)) {
+          console.error('[axios-sugar]: an axios static or instance only can call factory once.');
+      }
+      else {
+          usedAxios.push(axios);
+          return new AxiosSugar(axios, options);
+      }
+  }
 
   exports.AxiosSugarConfig = AxiosSugarConfig;
   exports.AxiosSugarInnerReleaseStorage = AxiosSugarInnerReleaseStorage;
   exports.AxiosSugarInnerStorage = AxiosSugarInnerStorage;
   exports.AxiosSugarLifeCycle = AxiosSugarLifeCycle;
   exports.AxiosSugarLocalStorage = AxiosSugarLocalStorage;
-  exports.default = AxiosSugar;
+  exports.default = factory;
 
   return exports;
 

@@ -16,4 +16,5 @@ export default class AxiosSugar {
     constructor(axios: AxiosInstance | AxiosStatic, options?: AxiosSugarOptions);
     private init;
 }
+export declare function factory(axios: AxiosInstance | AxiosStatic, options?: AxiosSugarOptions): undefined | AxiosSugar;
 export {};
