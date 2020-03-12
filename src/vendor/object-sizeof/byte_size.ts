@@ -20,4 +20,4 @@ export default {
   STRING: 2,
   BOOLEAN: 4,
   NUMBER: 8
-}
+};

@@ -1,4 +1,4 @@
-import AxiosSugarRequestStack from "../RequestStack";
+import { AxiosSugarRequestStack } from "../stack";
 import { genSymbol, notUndef, normalizeProp } from './utils';
 import AxiosSugar from "./AxiosSugar";
 import { AxiosSugarError } from './SugarError';

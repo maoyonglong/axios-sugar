@@ -1,15 +1,27 @@
+![license](https://img.shields.io/badge/license-MIT-brightgreen)
+
 # AxiosSugar
 An axios wrapper, which supports resending, storage, cancel repeat request automatically; and so on.
 
 # Usage
 ```js
 import axios from 'axios'
-import AxiosSugar from 'axios-sugar'
+// This is a factory to new AxiosSugar Class
+import factory from 'axios-sugar'
 
-const axiosSugar = new AxiosSugar(axios);
+factory(axios);
 // or
 const ins = axios.create();
-const axiosSugar = new AxiosSugar(ins);
+factory(ins);
+
+// In version 1.1.3-0, it is suggested to use factory instead of AxiosSugar class
+// If you really need this class, you can use as follow:
+import axios from 'axios'
+import { AxiosSugar } from 'axios-sugar'
+
+const axiosSugar = new AxiosSugar(axios);
+// but carefully, an axios instance only can be call `new AxiosSugar()` once
+
 
 // now you can use axios as before
 axios.get();
@@ -21,7 +33,7 @@ ins.get();
 # Config
 ```js
 import axios from 'axios'
-import AxiosSugar, { AxiosSugarConfig } from 'axios-sugar'
+import factory, { AxiosSugarConfig } from 'axios-sugar'
 
 // AxiosSugarConfigOptions
 let options = {
@@ -29,7 +41,7 @@ let options = {
   isSave: true
 }
 
-const axiosSugar = new AxiosSugar(axios, {
+factory(axios, {
   config: new AxiosSugarConfig(options)
 });
 ```
@@ -46,7 +58,7 @@ const axiosSugar = new AxiosSugar(axios, {
 prop is a property injected in the config of axios:
 ```js
 import axios from 'axios'
-import AxiosSugar, { AxiosSugarConfig } from 'axios-sugar'
+import factory, { AxiosSugarConfig } from 'axios-sugar'
 
 // AxiosSugarConfigOptions
 let options = {
@@ -54,7 +66,7 @@ let options = {
   isSave: true // default to use innerStorage
 }
 
-const axiosSugar = new AxiosSugar(axios, {
+factory(axios, {
   config: new AxiosSugarConfig(options)
 });
 
@@ -73,13 +85,13 @@ This library supports two way to save the response data`(res.data in axios.then)
 This storage will be save the data in a object variable.
 ```js
 import axios from 'axios'
-import AxiosSugar, { AxiosSugarInnerStorage } from 'axios-sugar'
+import factory, { AxiosSugarInnerStorage } from 'axios-sugar'
 
 let options = {
   isSave: true // default to use innerStorage
 }
 
-const axiosSugar = new AxiosSugar(axios, {
+factory(axios, {
   config: new AxiosSugarConfig(options),
   storage: new AxiosSugarInnerStorage() // storage
 });
@@ -88,13 +100,13 @@ const axiosSugar = new AxiosSugar(axios, {
 Unlike InnerStorage, it can automatically free up memory.
 ```js
 import axios from 'axios'
-import AxiosSugar, { AxiosSugarInnerReleaseStorage } from 'axios-sugar'
+import factory, { AxiosSugarInnerReleaseStorage } from 'axios-sugar'
 
 let options = {
   isSave: true // default to use innerStorage
 }
 
-const axiosSugar = new AxiosSugar(axios, {
+factory(axios, {
   config: new AxiosSugarConfig(options),
   storage: new AxiosSugarInnerReleaseStorage() // storage
 });
@@ -111,13 +123,13 @@ const axiosSugar = new AxiosSugar(axios, {
 This storage will be save the data in localStorage.
 ```js
 import axios from 'axios'
-import AxiosSugar, { AxiosSugarLocalStorage } from 'axios-sugar'
+import factory, { AxiosSugarLocalStorage } from 'axios-sugar'
 
 let options = {
   isSave: true // default to use innerStorage
 }
 
-const axiosSugar = new AxiosSugar(axios, {
+factory(axios, {
   config: new AxiosSugarConfig(options),
   storage: new AxiosSugarLocalStorage() // storage
 });
@@ -135,7 +147,7 @@ interface AxiosSugarStorage {
 // custom:
 ```js
 import axios from 'axios'
-import AxiosSugar from 'axios-sugar'
+import factory from 'axios-sugar'
 
 let options = {
   isSave: true // default to use innerStorage
@@ -149,7 +161,7 @@ class CustomStorage {
   contains (symbol: string);
 }
 
-const axiosSugar = new AxiosSugar(axios, {
+factory(axios, {
   config: new AxiosSugarConfig(options),
   storage: new CustomStorage() // storage
 });
@@ -159,7 +171,7 @@ const axiosSugar = new AxiosSugar(axios, {
 The lifecycle is some callback.
 ```js
 import axios from 'axios'
-import AxiosSugar, { AxiosSugarLifeCycle } from 'axios-sugar'
+import factory{ AxiosSugarLifeCycle } from 'axios-sugar'
 
 let cycle = new AxiosSugarLifeCycle();
 // now, you can override some callback
@@ -167,7 +179,7 @@ cycle.beforeRequest = (conf) => {
   return false // This will break the request
 }
 
-const axiosSugar = new AxiosSugar(axios, {
+factory(axios, {
   lifecycle: cycle
 })
 ```
@@ -195,6 +207,29 @@ The AxiosSugarError is:
 }
 ```
 
+### AxiosSugarError Handler
+You can catch the errors in `axios.catch`
+```js
+axios.get()
+  .catch(err => {
+    /**
+     * AxiosSugarError
+     * reason may be:
+     * beforeRequestBreak
+     * beforeResponseBreak
+     * existed
+     * ...
+     */
+    if (err.readon) {
+      console.log(err)
+    } 
+    // an axios error
+    else {
+      // ...
+    }
+  })
+```
+
 # Test
 **Node test**:
 ```
@@ -206,3 +241,6 @@ open the corresponding `index.html` File in `/test` which built by mocha.
 # TODO
 * Broken network retransmission
 * Broken network lifecycle
+
+# Change Log
+v1.1.3-0 export default a factory instead of exporting an AxiosSugar class

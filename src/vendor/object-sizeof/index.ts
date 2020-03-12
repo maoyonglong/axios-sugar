@@ -11,72 +11,75 @@
  * *******************************
  */
 
-'use strict'
+ /* eslint-disable */
+'use strict';
 
-import ECMA_SIZES from './byte_size'
+import ECMA_SIZES from './byte_size';
 
-var isBrowser = window !== undefined
+const isBrowser = typeof window !== 'undefined';
+let Buffer;
+
 if (!isBrowser) {
   /* eslint-disable global-require */
-  var Buffer = require('buffer').Buffer
+  Buffer = require('buffer').Buffer;
 }
 
 function sizeOfObject (seen, object) {
   if (object == null) {
-    return 0
+    return 0;
   }
 
-  var bytes = 0
-  for (var key in object) {
+  let bytes = 0;
+  for (const key in object) {
     // Do not recalculate circular references
     if (typeof object[key] === 'object' && object[key] !== null) {
       if (seen.has(object[key])) {
-        continue
+        continue;
       }
-      seen.add(object[key])
+      seen.add(object[key]);
     }
 
-    bytes += getCalculator(seen)(key)
+    bytes += getCalculator(seen)(key);
     try {
-      bytes += getCalculator(seen)(object[key])
+      bytes += getCalculator(seen)(object[key]);
     } catch (ex) {
       if (ex instanceof RangeError) {
         // circular reference detected, final result might be incorrect
         // let's be nice and not throw an exception
-        bytes = 0
+        bytes = 0;
       }
     }
   }
 
-  return bytes
+  return bytes;
 }
 
 function getCalculator (seen) {
   return function (object) {
     if (!isBrowser && Buffer.isBuffer(object)) {
-      return object.length
+      return object.length;
     }
 
-    var objectType = typeof (object)
+    const objectType = typeof (object);
     switch (objectType) {
       case 'string':
-        return object.length * ECMA_SIZES.STRING
+        return object.length * ECMA_SIZES.STRING;
       case 'boolean':
-        return ECMA_SIZES.BOOLEAN
+        return ECMA_SIZES.BOOLEAN;
       case 'number':
-        return ECMA_SIZES.NUMBER
+        return ECMA_SIZES.NUMBER;
       case 'object':
         if (Array.isArray(object)) {
           return object.map(getCalculator(seen)).reduce(function (acc, curr) {
-            return acc + curr
-          }, 0)
+            return acc + curr;
+          }, 0);
         } else {
-          return sizeOfObject(seen, object)
+          return sizeOfObject(seen, object);
         }
       default:
-        return 0
+        return 0;
     }
-  }
+  };
 }
 
 /**
@@ -86,7 +89,7 @@ function getCalculator (seen) {
  * @returns {*}
  */
 function sizeof (object) {
-  return getCalculator(new WeakSet())(object)
+  return getCalculator(new WeakSet())(object);
 }
 
-export default sizeof
+export default sizeof;

@@ -1,4 +1,4 @@
-import AxiosSugarRequestStack from '../src/RequestStack';
+import { AxiosSugarRequestStack } from '../src/stack';
 import { expect } from 'chai';
 import { AxiosRequestConfig } from 'axios';
 

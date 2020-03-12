@@ -10,7 +10,32 @@
     "es-lint": "npx eslint src/**/*.ts",
     "es-fix": "npx eslint --fix src/**/*.ts",
     "test": "npx mocha --reporter spec --require ts-node/register test/**/*.test.ts",
-    "publish": "npm publish --registry https://registry.npmjs.org"
+    "publish": "npm publish --registry https://registry.npmjs.org",
+    "cover": "npx nyc npm test",
+    "coveralls": "npx nyc npm test && npx nyc report --reporter=text-lcov | coveralls"
+  },
+  "nyc": {
+    "include": [
+      "src/**/*.ts"
+    ],
+    "exclude": [
+      "src/vendor/**/*.ts",
+      "src/index.ts",
+      "src/AxiosSugarStorage.ts"
+    ],
+    "extension": [
+      ".ts"
+    ],
+    "require": [
+      "ts-node/register"
+    ],
+    "reporter": [
+      "text",
+      "html"
+    ],
+    "sourceMap": true,
+    "instrument": true,
+    "all": true
   },
   "typings": "types/index.d.ts",
   "author": "maoyonglong",
@@ -29,7 +54,9 @@
     "axios-mock-adapter": "^1.17.0",
     "babel-eslint": "^10.1.0",
     "chai": "^4.2.0",
+    "coveralls": "^3.0.9",
     "eslint": "^6.8.0",
+    "istanbul": "^0.4.5",
     "mocha": "^7.1.0",
     "node-localstorage": "^2.1.5",
     "rollup": "^1.31.0",

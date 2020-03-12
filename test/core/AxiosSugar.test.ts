@@ -1,12 +1,18 @@
 import MockAdapter from 'axios-mock-adapter';
 import axios from 'axios';
-import AxiosSugar from '../../src/core/AxiosSugar';
+import AxiosSugar, { factory } from '../../src/core/AxiosSugar';
 import { expect } from 'chai';
 import AxiosSugarConfig from '../../src/AxiosSugarConfig';
 import AxiosSugarLifeCycle from '../../src/AxiosSugarLifeCycle';
 import { AxiosSugarInnerStorage } from '../../src/AxiosSugarStorage';
  
 let axiosSugar = new AxiosSugar(axios);
+
+it('factory', () => {
+  const ins = axios.create()
+  expect(factory(ins)).to.instanceOf(AxiosSugar);
+  expect(factory(ins)).to.undefined;
+});
 
 it('defaultOptions', () => {
   expect(axiosSugar.config instanceof AxiosSugarConfig).to.true;

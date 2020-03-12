@@ -1,7 +1,7 @@
 import { AxiosInstance, AxiosStatic } from 'axios';
 import AxiosSugarConfig from '../AxiosSugarConfig';
 import { AxiosSugarStorage, AxiosSugarInnerStorage } from '../AxiosSugarStorage';
-import AxiosSugarRequestStack from '../RequestStack';
+import { AxiosSugarRequestStack, AxiosStack } from '../stack';
 import responseInterceptors from './ResponseInterceptors';
 import requestInterceptors from './Requestinterceptors';
 import AxiosSugarLifeCycle from '../AxiosSugarLifeCycle';
@@ -30,5 +30,20 @@ export default class AxiosSugar {
   private init (): void {
     requestInterceptors(this, this.stack);
     responseInterceptors(this, this.stack);
+  }
+}
+
+// the axios has been used
+const usedAxios = new AxiosStack();
+
+export function factory (
+  axios: AxiosInstance | AxiosStatic,
+  options: AxiosSugarOptions = {}
+): undefined | AxiosSugar {
+  if (usedAxios.contains(axios)) {
+    console.error('[axios-sugar]: an axios static or instance only can call factory once.');
+  } else {
+    usedAxios.push(axios)
+    return new AxiosSugar(axios, options);
   }
 }

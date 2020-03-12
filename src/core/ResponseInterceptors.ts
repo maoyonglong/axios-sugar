@@ -1,5 +1,5 @@
 import AxiosSugar from './AxiosSugar';
-import AxiosSugarRequestStack from '../RequestStack';
+import { AxiosSugarRequestStack } from '../stack';
 import { notUndef, genSymbol } from './utils';
 import { AxiosSugarError } from './SugarError';
 import { isStr } from '../utils';
@@ -20,7 +20,7 @@ export default function (
 
     const cycleRes = lifecycle.beforeResponse(res);
     if (!cycleRes.state) {
-      error = { reason: 'beforeResponseBreack', message: cycleRes.message };
+      error = { reason: 'beforeResponseBreak', message: cycleRes.message };
       return Promise.reject(error);
     }
 

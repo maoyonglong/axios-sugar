@@ -1,4 +1,4 @@
-import AxiosSugar from './core/AxiosSugar';
+import { factory } from './core/AxiosSugar';
 import {
   AxiosSugarStorage,
   AxiosSugarInnerStorage,
@@ -8,7 +8,8 @@ import {
 import AxiosSugarConfig from './AxiosSugarConfig';
 import AxiosSugarLifeCycle from './AxiosSugarLifeCycle';
 
-export default AxiosSugar;
+// export a factory instead
+export default factory;
 
 export {
   AxiosSugarStorage,
@@ -16,5 +17,5 @@ export {
   AxiosSugarInnerStorage,
   AxiosSugarLocalStorage,
   AxiosSugarInnerReleaseStorage,
-  AxiosSugarConfig
-}
+  AxiosSugarConfig,
+};

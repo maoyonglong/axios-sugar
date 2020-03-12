@@ -9,7 +9,7 @@ export interface AxiosSugarStorage {
 
 export class AxiosSugarInnerStorage implements AxiosSugarStorage {
   data: {[key: string]: any} = {};
-  set (symbol: string, res: any) {
+  set (symbol: string, res: any): void {
     this.data[symbol] = res;
   }
   get (symbol: string): any {
@@ -20,51 +20,51 @@ export class AxiosSugarInnerStorage implements AxiosSugarStorage {
   }
 }
 
-// export class AxiosSugarInnerReleaseStorage extends AxiosSugarInnerStorage {
-//   // save time
-//   duration: number = 5 * 60 * 1000; // 5 minutes
-//   // volume limit
-//   limit: number = 15 * 1024 * 1024; // 15MB
-//   constructor (duration: number, limit: number) {
-//     super();
-//     if (isDef(duration)) this.duration = duration;
-//     if (isDef(limit)) this.limit = limit;
-//   }
-//   set (symbol: string, res: any) {
-//     let data = this.data;
-//     for (const [key, item] of Object.entries(data)) {
-//       if (getDurationMS(new Date().getTime(), item.time) >= this.duration) {
-//         delete data[key];
-//       }
-//     }
-//     if (sizeof(res) + sizeof(data) > this.limit) {
-//       data = this.data = {};
-//     }
-//     data[symbol] = {
-//       data: res,
-//       time: new Date().getTime()
-//     };
-//   }
-//   get (symbol: string): any {
-//     const target = this.data[symbol];
-//     return target ? target.data : null;
-//   }
-// }
+export class AxiosSugarInnerReleaseStorage extends AxiosSugarInnerStorage {
+  // save time
+  duration: number = 5 * 60 * 1000; // 5 minutes
+  // volume limit
+  limit: number = 15 * 1024 * 1024; // 15MB
+  constructor (duration: number, limit: number) {
+    super();
+    if (isDef(duration)) this.duration = duration;
+    if (isDef(limit)) this.limit = limit;
+  }
+  set (symbol: string, res: any): void {
+    let data = this.data;
+    for (const [key, item] of Object.entries(data)) {
+      if (getDurationMS(new Date().getTime(), item.time) >= this.duration) {
+        delete data[key];
+      }
+    }
+    if (sizeof(res) + sizeof(data) > this.limit) {
+      data = this.data = {};
+    }
+    data[symbol] = {
+      data: res,
+      time: new Date().getTime()
+    };
+  }
+  get (symbol: string): any {
+    const target = this.data[symbol];
+    return target ? target.data : null;
+  }
+}
 
 export class AxiosSugarLocalStorage implements AxiosSugarStorage {
-  set (symbol: string, res: any) {
+  set (symbol: string, res: any): void {
     try {
-      localStorage.setItem(symbol, JSON.stringify(res))
+      localStorage.setItem(symbol, JSON.stringify(res));
     } catch (err) {
-      console.error(`[axios-sugar]: ${err.message}`)
+      console.error(`[axios-sugar]: ${err.message}`);
     }
   }
-  get (symbol: string) {
-    const data = localStorage.getItem(symbol)
+  get (symbol: string): any {
+    const data = localStorage.getItem(symbol);
 
-    return data === null ? null : JSON.parse(data)
+    return data === null ? null : JSON.parse(data);
   }
-  contains (symbol: string) {
-    return this.get(symbol) !== null
+  contains (symbol: string): boolean {
+    return this.get(symbol) !== null;
   }
 }
