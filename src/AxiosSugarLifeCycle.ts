@@ -1,4 +1,4 @@
-import { AxiosRequestConfig, AxiosResponse } from 'axios';
+import { AxiosRequestConfig, AxiosResponse } from './vendor/axios/index';
 
 interface AxiosSugarLifeCycleResult {
   state: boolean;

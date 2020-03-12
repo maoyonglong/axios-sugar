@@ -1,4 +1,4 @@
-import { AxiosRequestConfig } from 'axios';
+import { AxiosRequestConfig } from '../vendor/axios';
 import { isDef } from '../utils';
 
 // where the sending data in ? (params or data)

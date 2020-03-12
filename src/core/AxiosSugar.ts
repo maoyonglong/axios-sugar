@@ -1,4 +1,4 @@
-import { AxiosInstance, AxiosStatic } from 'axios';
+import { AxiosInstance, AxiosStatic } from '../vendor/axios';
 import AxiosSugarConfig from '../AxiosSugarConfig';
 import { AxiosSugarStorage, AxiosSugarInnerStorage } from '../AxiosSugarStorage';
 import { AxiosSugarRequestStack, AxiosStack } from '../stack';

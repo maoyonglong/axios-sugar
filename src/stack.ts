@@ -1,4 +1,4 @@
-import { AxiosRequestConfig, AxiosInstance, AxiosStatic } from 'axios';
+import { AxiosRequestConfig, AxiosInstance, AxiosStatic } from './vendor/axios';
 
 export class Stack<el> {
   protected stack: el[] = [];
