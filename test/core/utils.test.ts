@@ -1,5 +1,5 @@
 import { genSymbol, normalizeProp } from '../../src/core/utils';
-import { AxiosRequestConfig } from 'axios';
+import { AxiosRequestConfig } from '../../src/vendor/axios';
 import { expect } from 'chai';
 import axios from 'axios';
 

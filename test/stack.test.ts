@@ -1,6 +1,6 @@
 import { AxiosSugarRequestStack } from '../src/stack';
 import { expect } from 'chai';
-import { AxiosRequestConfig } from 'axios';
+import { AxiosRequestConfig } from '../src/vendor/axios';
 
 let stack = new AxiosSugarRequestStack();
 let conf: AxiosRequestConfig = {method: 'get'};
