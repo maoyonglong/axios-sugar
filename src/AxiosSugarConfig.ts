@@ -17,7 +17,7 @@ export default class AxiosSugarConfig {
   constructor (options?: AxiosSugarConfigOptions) {
     options = options || {};
     for (const key of Object.keys(options)) {
-      if (isDef(key)) {
+      if (isDef(this[key])) {
         this[key] = options[key];
       } else {
         console.error(`[axios sugar]: the option ${key} is not valid.`);

@@ -1,4 +1,4 @@
-import { capitalize, isDef } from '../src/utils';
+import { capitalize, isDef, getDurationMS } from '../src/utils';
 import { expect } from 'chai';
 
 it('capitalize', () => {
@@ -10,4 +10,8 @@ it('isDef', () => {
   expect(isDef([])).to.true;
   expect(isDef('')).to.true;
   expect(isDef({})).to.true;
+});
+
+it('getDurationMS', () => {
+  expect(getDurationMS(new Date(2020,2,12,11,34).getTime(), new Date(2020,2,12,11,33).getTime())).to.eq(60 * 1000);
 });

@@ -23,3 +23,10 @@ it('override', () => {
   expect(config.resendDelay).to.eq(1000);
   expect(config.resendTimes).to.eq(3);
 });
+
+it('not valid key', () => {
+  config = new AxiosSugarConfig({
+    a: 1
+  } as any);
+  expect((config as any).a).to.undefined;
+});
