@@ -2,7 +2,8 @@
   "compilerOptions": {
     "declaration":true,
     "declarationDir": "types",
-    "removeComments": true
+    "removeComments": true,
+    "esModuleInterop": true
   },
   "include": [
     "src",

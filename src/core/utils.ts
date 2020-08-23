@@ -1,66 +1,75 @@
-import { AxiosRequestConfig } from '../vendor/axios';
-import { isDef } from '../utils';
+import {
+  deepMerge as deepMergeFn,
+  merge as mergeFn
+} from 'axios/lib/utils';
+import isOnlineFn from 'is-online';
 
-// where the sending data in ? (params or data)
-function sendDataWay (method: string): 'data' | 'params' | 'both' {
-  const isInData = ['post', 'put', 'patch'].indexOf(method) >= 0,
-    isInParams = method === 'get';
-  return isInData ? 'data' : (isInParams ? 'params' : 'both');
+export function capitalize (str: string): string {
+  return str.substring(0, 1).toUpperCase() + str.substring(1);
 }
 
-export function normalizeProp (config: AxiosRequestConfig, prop = 'custom'): AxiosRequestConfig {
-  // if custom prop in data
-  if (sendDataWay(config.method) === 'data' && config.data) {
-    const propVal = config.data[prop];
-    if (propVal) {
-      config[prop] = propVal;
-      delete config.data[prop];
-    }
-  }
-  return config;
+export function isDef (value: any): boolean {
+  return typeof value !== 'undefined';
 }
 
-export function genSymbol (config: AxiosRequestConfig): string {
-  let { url } = config;
-  const { method } = config;
-  // the data send before
-  let data;
+export function isStr (value: any): boolean {
+  return typeof value === 'string';
+}
 
-  function getParamsSymbolData (params: object): string {
-    let data = '';
-    if (/\?/.test(url)) {
-      const part = url.split('?');
-      url = part[0];
-      data += part[1];
-    }
-    if (params) {
-      for (const [key, val] of Object.entries(params)) {
-        if (data !== '') data += '&';
-        data += `${key}=${val}`;
-      }
-    }
-    return data;
-  }
-
-  function getDataSymbolData (data: object): string {
-    return isDef(data) ? JSON.stringify(data) : '';
-  }
-
-  // get the sent data
-  switch (sendDataWay(method)) {
-    case 'params':
-      data = getParamsSymbolData(config.params);
-      break;
-    case 'data':
-      data = getDataSymbolData(config.data);
-      break;
-    case 'both':
-      data = getParamsSymbolData(config.params) || getDataSymbolData(config.params);
-  }
-
-  return `method=${method}&url=${url}&data=${data}`;
+export function getDurationMS (a: number, b: number): number {
+  return a - b;
 }
 
 export function notUndef<T = any, D = any> (targetVal: T, defaultVal: D): T | D {
   return typeof targetVal === 'undefined' ? defaultVal : targetVal;
+}
+
+function customMessage (msg: string) {
+  return `[axios-sugar]: ${msg}.`;
+}
+
+export function log (msg: string) {
+  console.log(customMessage(msg));
+}
+
+export function warn (msg: string) {
+  console.warn(customMessage(msg));
+}
+
+export function error (msg: string) {
+  console.error(customMessage(msg));
+}
+
+export function throwError (msg: string) {
+  throw new Error(customMessage(msg));
+}
+
+export function isDev () {
+  return process.env.NODE_ENV === 'development';
+}
+
+export function isFn (val) {
+  return typeof val === 'function';
+}
+
+export function isNum (val) {
+  return typeof val === 'number';
+}
+
+export function deepMerge (...args) {
+  return deepMergeFn.apply(null, args);
+}
+
+export function merge (...args) {
+  return mergeFn.apply(null, args);
+}
+
+interface onlineOptions {
+  timeout?: number
+}
+
+export function isOnline (options: onlineOptions = {}) {
+  return isOnlineFn({
+    timeout: options.timeout
+  });
 }

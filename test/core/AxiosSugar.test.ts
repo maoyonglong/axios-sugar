@@ -1,26 +1,8 @@
 import MockAdapter from 'axios-mock-adapter';
-import axios from 'axios';
-import AxiosSugar, { factory } from '../../src/core/AxiosSugar';
+import axiosSugar from '../../src/index';
 import { expect } from 'chai';
-import AxiosSugarConfig from '../../src/AxiosSugarConfig';
-import AxiosSugarLifeCycle from '../../src/AxiosSugarLifeCycle';
-import { AxiosSugarInnerStorage } from '../../src/AxiosSugarStorage';
- 
-let axiosSugar = new AxiosSugar(axios);
 
-it('factory', () => {
-  const ins = axios.create()
-  expect(factory(ins)).to.instanceOf(AxiosSugar);
-  expect(factory(ins)).to.undefined;
-});
-
-it('defaultOptions', () => {
-  expect(axiosSugar.config instanceof AxiosSugarConfig).to.true;
-  expect(axiosSugar.lifecycle instanceof AxiosSugarLifeCycle).to.true;
-  expect(axiosSugar.storage instanceof AxiosSugarInnerStorage).to.true;
-});
-
-const mock = new MockAdapter(axios);
+const mock = new MockAdapter(axiosSugar.axios);
 const usersData = {
   users: [
     { id: 1, name: 'John Smith' }
@@ -29,94 +11,37 @@ const usersData = {
 
 mock.onGet('/users').reply(200, usersData);
 
-it('beforeRequestBreak', () => {
-  const lifecycle = new AxiosSugarLifeCycle();
-  const message = 'break request.';
-  lifecycle.beforeRequest = (conf) => ({state: false, message });
+it('get', async () => {
+  const result = await axiosSugar.get('/users');
+  expect(result.data).to.deep.eq(usersData);
+})
 
-  axios
-    .get('/users')
-    .catch(function(error) {
-      expect(error.reason).to.eq('beforeRequestBreak');
-      expect(error.message).to.eq(message);
-    });
-});
+mock.onGet('/notFound').reply(404);
 
-it('beforeResponseBreak', () => {
-  const lifecycle = new AxiosSugarLifeCycle();
-  const message = 'break response.';
-  lifecycle.beforeResponse = (conf) => ({state: false, message });
+mock.onGet('/timeout').timeout();
 
-  axios
-    .get('/users')
-    .catch(function(error) {
-      expect(error.reason).to.eq('beforeResponseBreak');
-      expect(error.message).to.eq(message);
-    });
-});
-
-let ins = axios.create();
-
-axiosSugar = new AxiosSugar(ins, {
-  config: new AxiosSugarConfig({
-    isResend: true,
-    resendDelay: 200
-  })
-});
-
-let times = -1;
-let timeoutOnce = true;
-mock.onPost('/timeout').reply(() => {
-  times++;
-  if (!timeoutOnce) return [404, {}];
-  return times === 0 ? [404, {}] : [200, {code: 0}];
-});
-
-it('resend', () => {
-  // let currentResendTimes = 0
-  ins
-    .post('/timeout', {
-      data: 1,
-      isResend: true
-    })
-    .then(resData => {
-      expect(resData).to.eql({code: 0});
-    })
-    .then(() => {
-      timeoutOnce = false;
-      ins.post('/timeout')
-        .catch(err => {
-          expect(err.reason).to.eq('resendEnd');
-        })
-    })
-});
-
-it('save', () => {
-  axiosSugar.config = new AxiosSugarConfig({
-    isSave: true
+it('not found', (done) => {
+  axiosSugar.get('/notFound').catch((err) => {
+    try {
+      expect(err.message).to.eq('Request failed with status code 404');
+      done();
+    } catch (err) {
+      done(err);
+    }
   });
-  let resTimes = 0;
-  function saveGetUsers (times) {
-    ins
-    .get('/users')
-    .then(resData => {
-      resTimes++;
-      expect(resTimes).to.eq(times);
-      expect(resData).to.deep.eq(usersData);
-    });
-  }
-  saveGetUsers(1);
-  setTimeout(() => {
-    saveGetUsers(2);
-  })
-});
+})
 
-it('no repeat', () => {
-  ins.get('/users');
-  ins
-    .get('/users')
-    .catch(err => {
-      expect(err.reason).to.eq('existed');
-    });
+it('not repeat', () => {
+  const result = axiosSugar.get('/timeout');
+  const second = axiosSugar.get('/timeout');
+  return new Promise((resolve, reject) => {
+    result.catch((err) => {
+      expect(axiosSugar.isCancel(err.reason)).to.true;
+      resolve();
+    }).catch((err) => {
+      reject(err);
+    })
+    second.catch(() => {});
+  })
 });
  

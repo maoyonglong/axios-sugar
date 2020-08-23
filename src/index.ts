@@ -1,21 +1,10 @@
-import { factory } from './core/AxiosSugar';
-import {
-  AxiosSugarStorage,
-  AxiosSugarInnerStorage,
-  AxiosSugarLocalStorage,
-  AxiosSugarInnerReleaseStorage
-} from './AxiosSugarStorage';
-import AxiosSugarConfig from './AxiosSugarConfig';
-import AxiosSugarLifeCycle from './AxiosSugarLifeCycle';
+import { AxiosSugar } from './core/AxiosSugar';
+import HttpStatusProcessor from './core/HttpStatusProcessor';
 
-// export a factory instead
-export default factory;
+const axiosSugar = new AxiosSugar();
+
+export default axiosSugar;
 
 export {
-  AxiosSugarStorage,
-  AxiosSugarLifeCycle,
-  AxiosSugarInnerStorage,
-  AxiosSugarLocalStorage,
-  AxiosSugarInnerReleaseStorage,
-  AxiosSugarConfig,
+  HttpStatusProcessor
 };

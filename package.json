@@ -1,7 +1,7 @@
 {
   "name": "axios-sugar",
-  "version": "1.1.2-0",
-  "description": "An axios wrapper, which supports resending, store and so on",
+  "version": "2.0.0-0",
+  "description": "A wrapper for axios",
   "main": "dist/axios-sugar.cjs.js",
   "scripts": {
     "start": "npm run dev",
@@ -21,7 +21,7 @@
     "exclude": [
       "src/vendor/**/*.ts",
       "src/index.ts",
-      "src/AxiosSugarStorage.ts"
+      "src/core/AxiosSugarStorage.ts"
     ],
     "extension": [
       ".ts"
@@ -46,24 +46,33 @@
     "url": "git@github.com:maoyonglong/axios-sugar.git"
   },
   "devDependencies": {
-    "@types/chai": "^4.2.9",
-    "@types/mocha": "^7.0.1",
-    "@typescript-eslint/eslint-plugin": "^2.19.2",
-    "@typescript-eslint/parser": "^2.19.2",
-    "axios": "^0.19.2",
-    "axios-mock-adapter": "^1.17.0",
-    "babel-eslint": "^10.1.0",
+    "@types/chai": "^4.2.12",
+    "@types/mocha": "^7.0.2",
+    "@typescript-eslint/eslint-plugin": "^2.34.0",
+    "@typescript-eslint/parser": "^2.34.0",
+    "axios-mock-adapter": "^1.18.2",
     "chai": "^4.2.0",
-    "coveralls": "^3.0.9",
+    "coveralls": "^3.1.0",
+    "cz-conventional-changelog": "^3.2.0",
     "eslint": "^6.8.0",
     "istanbul": "^0.4.5",
-    "mocha": "^7.1.0",
+    "mocha": "^7.2.0",
     "node-localstorage": "^2.1.5",
-    "rollup": "^1.31.0",
+    "rollup": "^1.32.1",
+    "rollup-plugin-typescript": "^1.0.1",
     "rollup-plugin-typescript2": "^0.25.3",
     "rollup-plugin-uglify": "^6.0.4",
-    "ts-node": "^8.6.2",
-    "typescript": "^3.7.5"
+    "ts-node": "^8.10.2",
+    "typescript": "^3.9.7"
   },
-  "dependencies": {}
+  "dependencies": {
+    "axios": "^0.19.2",
+    "is-online": "^8.4.0",
+    "object-sizeof": "^1.6.1"
+  },
+  "config": {
+    "commitizen": {
+      "path": "./node_modules/cz-conventional-changelog"
+    }
+  }
 }

@@ -2,36 +2,9 @@
 
 Object.defineProperty(exports, '__esModule', { value: true });
 
-function isDef(value) {
-    return typeof value !== 'undefined';
-}
-function isStr(value) {
-    return typeof value === 'string';
-}
-function getDurationMS(a, b) {
-    return a - b;
-}
+function _interopDefault (ex) { return (ex && (typeof ex === 'object') && 'default' in ex) ? ex['default'] : ex; }
 
-var AxiosSugarConfig = (function () {
-    function AxiosSugarConfig(options) {
-        this.isResend = false;
-        this.resendDelay = 1000;
-        this.resendTimes = 3;
-        this.isSave = false;
-        this.prop = 'custom';
-        options = options || {};
-        for (var _i = 0, _a = Object.keys(options); _i < _a.length; _i++) {
-            var key = _a[_i];
-            if (isDef(key)) {
-                this[key] = options[key];
-            }
-            else {
-                console.error("[axios sugar]: the option " + key + " is not valid.");
-            }
-        }
-    }
-    return AxiosSugarConfig;
-}());
+var axios = _interopDefault(require('axios'));
 
 /*! *****************************************************************************
 Copyright (c) Microsoft Corporation. All rights reserved.
@@ -62,399 +35,245 @@ function __extends(d, b) {
     d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 }
 
-var ECMA_SIZES = {
-    STRING: 2,
-    BOOLEAN: 4,
-    NUMBER: 8
+var defaults = {
+    timeout: 2000,
+    save: false,
+    retry: {
+        enable: false,
+        count: 3
+    },
 };
 
-var isBrowser = typeof window !== 'undefined';
-var Buffer;
-if (!isBrowser) {
-    Buffer = require('buffer').Buffer;
-}
-function sizeOfObject(seen, object) {
-    if (object == null) {
-        return 0;
+var AxiosSugarInterceptorManager = (function () {
+    function AxiosSugarInterceptorManager() {
+        this.handlers = [];
     }
-    var bytes = 0;
-    for (var key in object) {
-        if (typeof object[key] === 'object' && object[key] !== null) {
-            if (seen.has(object[key])) {
-                continue;
+    AxiosSugarInterceptorManager.prototype.use = function (fullfilled, rejected) {
+        this.handlers.push({
+            fullfilled: fullfilled,
+            rejected: rejected
+        });
+        return this.handlers.length - 1;
+    };
+    AxiosSugarInterceptorManager.prototype.eject = function (i) {
+        if (this.handlers[i]) {
+            this.handlers[i] = null;
+        }
+    };
+    AxiosSugarInterceptorManager.prototype.each = function (fn) {
+        this.handlers.forEach(function (handler) {
+            if (handler !== null) {
+                fn(handler);
             }
-            seen.add(object[key]);
-        }
-        bytes += getCalculator(seen)(key);
-        try {
-            bytes += getCalculator(seen)(object[key]);
-        }
-        catch (ex) {
-            if (ex instanceof RangeError) {
-                bytes = 0;
-            }
-        }
-    }
-    return bytes;
-}
-function getCalculator(seen) {
-    return function (object) {
-        if (!isBrowser && Buffer.isBuffer(object)) {
-            return object.length;
-        }
-        var objectType = typeof (object);
-        switch (objectType) {
-            case 'string':
-                return object.length * ECMA_SIZES.STRING;
-            case 'boolean':
-                return ECMA_SIZES.BOOLEAN;
-            case 'number':
-                return ECMA_SIZES.NUMBER;
-            case 'object':
-                if (Array.isArray(object)) {
-                    return object.map(getCalculator(seen)).reduce(function (acc, curr) {
-                        return acc + curr;
-                    }, 0);
-                }
-                else {
-                    return sizeOfObject(seen, object);
-                }
-            default:
-                return 0;
-        }
-    };
-}
-function sizeof(object) {
-    return getCalculator(new WeakSet())(object);
-}
-
-var AxiosSugarInnerStorage = (function () {
-    function AxiosSugarInnerStorage() {
-        this.data = {};
-    }
-    AxiosSugarInnerStorage.prototype.set = function (symbol, res) {
-        this.data[symbol] = res;
-    };
-    AxiosSugarInnerStorage.prototype.get = function (symbol) {
-        return this.data[symbol] || null;
-    };
-    AxiosSugarInnerStorage.prototype.contains = function (symbol) {
-        return typeof this.data[symbol] !== 'undefined';
-    };
-    return AxiosSugarInnerStorage;
-}());
-var AxiosSugarInnerReleaseStorage = (function (_super) {
-    __extends(AxiosSugarInnerReleaseStorage, _super);
-    function AxiosSugarInnerReleaseStorage(duration, limit) {
-        var _this = _super.call(this) || this;
-        _this.duration = 5 * 60 * 1000;
-        _this.limit = 15 * 1024 * 1024;
-        if (isDef(duration))
-            _this.duration = duration;
-        if (isDef(limit))
-            _this.limit = limit;
-        return _this;
-    }
-    AxiosSugarInnerReleaseStorage.prototype.set = function (symbol, res) {
-        var data = this.data;
-        for (var _i = 0, _a = Object.entries(data); _i < _a.length; _i++) {
-            var _b = _a[_i], key = _b[0], item = _b[1];
-            if (getDurationMS(new Date().getTime(), item.time) >= this.duration) {
-                delete data[key];
-            }
-        }
-        if (sizeof(res) + sizeof(data) > this.limit) {
-            data = this.data = {};
-        }
-        data[symbol] = {
-            data: res,
-            time: new Date().getTime()
-        };
-    };
-    AxiosSugarInnerReleaseStorage.prototype.get = function (symbol) {
-        var target = this.data[symbol];
-        return target ? target.data : null;
-    };
-    return AxiosSugarInnerReleaseStorage;
-}(AxiosSugarInnerStorage));
-var AxiosSugarLocalStorage = (function () {
-    function AxiosSugarLocalStorage() {
-    }
-    AxiosSugarLocalStorage.prototype.set = function (symbol, res) {
-        try {
-            localStorage.setItem(symbol, JSON.stringify(res));
-        }
-        catch (err) {
-            console.error("[axios-sugar]: " + err.message);
-        }
-    };
-    AxiosSugarLocalStorage.prototype.get = function (symbol) {
-        var data = localStorage.getItem(symbol);
-        return data === null ? null : JSON.parse(data);
-    };
-    AxiosSugarLocalStorage.prototype.contains = function (symbol) {
-        return this.get(symbol) !== null;
-    };
-    return AxiosSugarLocalStorage;
-}());
-
-var Stack = (function () {
-    function Stack() {
-        this.stack = [];
-    }
-    Stack.prototype.push = function (el) {
-        return this.stack.push(el);
-    };
-    Stack.prototype.pop = function () {
-        return this.stack.pop();
-    };
-    Stack.prototype.contains = function (el) {
-        return this.stack.indexOf(el) >= 0;
-    };
-    Stack.prototype.remove = function (el) {
-        return this.stack.splice(this.indexOf(el), 1)[0];
-    };
-    Stack.prototype.indexOf = function (el) {
-        return this.stack.indexOf(el);
-    };
-    return Stack;
-}());
-var AxiosSugarRequestStack = (function (_super) {
-    __extends(AxiosSugarRequestStack, _super);
-    function AxiosSugarRequestStack() {
-        return _super !== null && _super.apply(this, arguments) || this;
-    }
-    AxiosSugarRequestStack.prototype.forEach = function (cb) {
-        this.stack.forEach(function (conf, confIdx, thisArg) {
-            cb.call(conf, conf, confIdx, thisArg);
         });
     };
-    return AxiosSugarRequestStack;
-}(Stack));
-var AxiosStack = (function (_super) {
-    __extends(AxiosStack, _super);
-    function AxiosStack() {
-        return _super !== null && _super.apply(this, arguments) || this;
-    }
-    return AxiosStack;
-}(Stack));
-
-function sendDataWay(method) {
-    var isInData = ['post', 'put', 'patch'].indexOf(method) >= 0, isInParams = method === 'get';
-    return isInData ? 'data' : (isInParams ? 'params' : 'both');
-}
-function normalizeProp(config, prop) {
-    if (prop === void 0) { prop = 'custom'; }
-    if (sendDataWay(config.method) === 'data' && config.data) {
-        var propVal = config.data[prop];
-        if (propVal) {
-            config[prop] = propVal;
-            delete config.data[prop];
-        }
-    }
-    return config;
-}
-function genSymbol(config) {
-    var url = config.url;
-    var method = config.method;
-    var data;
-    function getParamsSymbolData(params) {
-        var data = '';
-        if (/\?/.test(url)) {
-            var part = url.split('?');
-            url = part[0];
-            data += part[1];
-        }
-        if (params) {
-            for (var _i = 0, _a = Object.entries(params); _i < _a.length; _i++) {
-                var _b = _a[_i], key = _b[0], val = _b[1];
-                if (data !== '')
-                    data += '&';
-                data += key + "=" + val;
-            }
-        }
-        return data;
-    }
-    function getDataSymbolData(data) {
-        return isDef(data) ? JSON.stringify(data) : '';
-    }
-    switch (sendDataWay(method)) {
-        case 'params':
-            data = getParamsSymbolData(config.params);
-            break;
-        case 'data':
-            data = getDataSymbolData(config.data);
-            break;
-        case 'both':
-            data = getParamsSymbolData(config.params) || getDataSymbolData(config.params);
-    }
-    return "method=" + method + "&url=" + url + "&data=" + data;
-}
-function notUndef(targetVal, defaultVal) {
-    return typeof targetVal === 'undefined' ? defaultVal : targetVal;
-}
-
-function responseInterceptors (sugar, stack) {
-    var axios = sugar.axios;
-    var storage = sugar.storage;
-    var conf = sugar.config;
-    var lifecycle = sugar.lifecycle;
-    var error;
-    axios.interceptors.response.use(function (res) {
-        var config = res.config;
-        var resData = res.data;
-        var cycleRes = lifecycle.beforeResponse(res);
-        if (!cycleRes.state) {
-            error = { reason: 'beforeResponseBreak', message: cycleRes.message };
-            return Promise.reject(error);
-        }
-        if (config) {
-            stack.remove(config);
-        }
-        var custom = config.custom;
-        var isSave;
-        if (custom) {
-            isSave = notUndef(custom.isSave, conf.isSave);
-        }
-        if (isSave) {
-            var symbol = genSymbol(config);
-            storage.set(symbol, resData);
-        }
-        return Promise.resolve(resData);
-    }, function (err) {
-        var reason = err.reason;
-        if (reason) {
-            return reason === 'saved' ? Promise.resolve(err.data) : Promise.reject(err);
-        }
-        var config = err.config;
-        if (config) {
-            stack.remove(config);
-            var custom_1 = config[conf.prop];
-            var isResend = conf.isResend, resendDelay_1 = conf.resendDelay, resendTimes = conf.resendTimes, curResendTimes_1 = 0;
-            if (custom_1) {
-                isResend = notUndef(custom_1.isResend, isResend);
-                resendDelay_1 = notUndef(custom_1.resendDelay, resendDelay_1);
-                resendTimes = notUndef(custom_1.resendTimes, resendTimes);
-                curResendTimes_1 = notUndef(custom_1.curResendTimes, 0);
-            }
-            if (isResend) {
-                if (curResendTimes_1 < resendTimes) {
-                    return new Promise(function (resolve) {
-                        setTimeout(function () {
-                            if (!custom_1) {
-                                config.custom = {};
-                            }
-                            config.custom.curResendTimes = ++curResendTimes_1;
-                            if (isStr(config.data)) {
-                                config.data = JSON.parse(config.data);
-                            }
-                            return resolve(axios.request(config));
-                        }, resendDelay_1);
-                    });
-                }
-                else {
-                    error = { reason: 'resendEnd', message: "Can't get a response." };
-                    return Promise.reject(error);
-                }
-            }
-            else {
-                return Promise.reject(err);
-            }
-        }
-    });
-}
-
-function requestInterceptors (sugar, stack) {
-    var axios = sugar.axios;
-    var storage = sugar.storage;
-    var conf = sugar.config;
-    var lifecycle = sugar.lifecycle;
-    var error;
-    axios.interceptors.request.use(function (config) {
-        config = normalizeProp(config, conf.prop);
-        if (stack.contains(config)) {
-            error = { reason: 'existed' };
-            return Promise.reject(error);
-        }
-        var custom = config[conf.prop];
-        var isSave = conf.isSave;
-        if (custom) {
-            isSave = notUndef(custom.isSave, isSave);
-        }
-        if (isSave) {
-            var storageRes = storage.get(genSymbol(config));
-            if (storageRes) {
-                error = { reason: 'saved', data: storageRes };
-                return Promise.reject(error);
-            }
-        }
-        var cycleRes = lifecycle.beforeRequest(config);
-        if (!cycleRes.state) {
-            error = { reason: 'beforeRequestBreak', message: cycleRes.message };
-            return Promise.reject(error);
-        }
-        stack.push(config);
-        return Promise.resolve(config);
-    }, function (err) {
-        Promise.reject(err);
-    });
-}
-
-var AxiosSugarLifeCycle = (function () {
-    function AxiosSugarLifeCycle() {
-    }
-    AxiosSugarLifeCycle.prototype.beforeRequest = function (conf) {
-        return {
-            state: true,
-            message: ''
-        };
-    };
-    AxiosSugarLifeCycle.prototype.beforeResponse = function (res) {
-        return {
-            state: true,
-            message: ''
-        };
-    };
-    return AxiosSugarLifeCycle;
+    return AxiosSugarInterceptorManager;
 }());
 
-var AxiosSugar = (function () {
-    function AxiosSugar(axios, options) {
-        var _this = this;
-        if (options === void 0) { options = {}; }
-        this.stack = new AxiosSugarRequestStack();
-        this.config = new AxiosSugarConfig();
-        this.storage = new AxiosSugarInnerStorage();
-        this.lifecycle = new AxiosSugarLifeCycle();
-        this.axios = axios;
-        ['config', 'storage', 'lifecycle'].forEach(function (option) {
-            if (options[option]) {
-                _this[option] = options[option];
-            }
-        });
-        this.init();
-    }
-    AxiosSugar.prototype.init = function () {
-        requestInterceptors(this, this.stack);
-        responseInterceptors(this, this.stack);
-    };
-    return AxiosSugar;
-}());
-var usedAxios = new AxiosStack();
-function factory(axios, options) {
-    if (options === void 0) { options = {}; }
-    if (usedAxios.contains(axios)) {
-        console.error('[axios-sugar]: an axios static or instance only can call factory once.');
+function dispatchRequest (config) {
+    return this.axios.request(config.axios).then(function (response) { return ({
+        response: response,
+        sugar: config.sugar
+    }); }, function (reason) { return Promise.reject({
+        reason: reason,
+        index: config.index,
+        sugar: config.sugar
+    }); });
+}
+
+var MiddleData = {
+    tags: [],
+    cancelTokens: []
+};
+
+function repeatTag(axiosConfig, config) {
+    return "method=" + axiosConfig.method + ",url=" + axiosConfig.url;
+}
+function repeat (config) {
+    var tag = repeatTag(config.axios, config.sugar);
+    var i = MiddleData.tags.indexOf(tag);
+    if (i >= 0) {
+        MiddleData.cancelTokens[i]();
+        MiddleData.tags[i] = null;
+        MiddleData.cancelTokens[i] = null;
     }
     else {
-        usedAxios.push(axios);
-        return new AxiosSugar(axios, options);
+        var token = axios.CancelToken.source().token;
+        config.axios.cancelToken = token;
+        MiddleData.cancelTokens.push(token);
     }
+    return this.tags.push(tag) - 1;
 }
 
-exports.AxiosSugarConfig = AxiosSugarConfig;
-exports.AxiosSugarInnerReleaseStorage = AxiosSugarInnerReleaseStorage;
-exports.AxiosSugarInnerStorage = AxiosSugarInnerStorage;
-exports.AxiosSugarLifeCycle = AxiosSugarLifeCycle;
-exports.AxiosSugarLocalStorage = AxiosSugarLocalStorage;
-exports.default = factory;
+function initInterceptors(axiosSugar) {
+    axiosSugar.interceptors.request.use(function (config) {
+        config.index = repeat(config);
+        return config;
+    }, function (err) {
+        return Promise.reject(err);
+    });
+    axiosSugar.interceptors.response.use(function (config) {
+        if (MiddleData.tags[config.index] !== null) {
+            MiddleData.tags[config.index] = null;
+        }
+        return axiosSugar.httpStatusProcessor.dispatch(config.response.status, config);
+    }, function (err) {
+        var result = axiosSugar.httpStatusProcessor.dispatch(err.reason.response.status, err);
+        return Promise.resolve(result || err);
+    });
+}
+
+function log(msg) {
+    console.log("[axios-sugar]: " + msg + ".");
+}
+function isDev() {
+    return process.env.NODE_ENV === 'development';
+}
+
+var HttpStatusProcessorPrototype = (function () {
+    function HttpStatusProcessorPrototype() {
+        this.statusTable = {
+            200: this.onOk,
+            201: this.onCreated,
+            202: this.onAccepted,
+            203: this.onNonAuthoritativeInformation,
+            204: this.onNoContent,
+            205: this.onResetContent,
+            206: this.onPartialContent,
+            207: this.onMultiStatus,
+            400: this.onBadRequest,
+            401: this.onUnauthorized,
+            403: this.onForbidden,
+            404: this.onNotFound,
+            405: this.onMethodNotAllow,
+            406: this.onNotAcceptable,
+            407: this.onProxyAuthenticationRequired,
+            408: this.onTimeout,
+            409: this.onConflict,
+            500: this.onInternalServerError,
+            501: this.onNotImplemented,
+            502: this.onBadGateway
+        };
+        this.reservedCodes = Object.keys(this.statusTable);
+    }
+    HttpStatusProcessorPrototype.prototype.setStatusHandler = function (status, fn) {
+        if (this.reservedCodes.indexOf(status) < 0) {
+            this.statusTable[status] = fn;
+            return true;
+        }
+        else if (isDev()) {
+            log("can't set the handler of http status code " + status + ".");
+        }
+        return false;
+    };
+    HttpStatusProcessorPrototype.prototype.dispatch = function (status) {
+        var args = [];
+        for (var _i = 1; _i < arguments.length; _i++) {
+            args[_i - 1] = arguments[_i];
+        }
+        var firstCode = status.toString().substr(0, 1);
+        var result;
+        if (this["on" + firstCode + "XXBefore"]) {
+            result = this["on" + firstCode + "XXBefore"].call(null, status, args);
+        }
+        if (this.statusTable[status]) {
+            result = this.statusTable[status].call(null, status, args, result);
+        }
+        if (this["on" + firstCode + "XXAfter"]) {
+            result = this.statusTable[status].call(null, status, args, result);
+        }
+        return result;
+    };
+    return HttpStatusProcessorPrototype;
+}());
+var HttpStatusProcessor = (function (_super) {
+    __extends(HttpStatusProcessor, _super);
+    function HttpStatusProcessor() {
+        return _super !== null && _super.apply(this, arguments) || this;
+    }
+    return HttpStatusProcessor;
+}(HttpStatusProcessorPrototype));
+var errorhandlers = [
+    'BadRequest',
+    'Unauthorized',
+    'Forbidden',
+    'NotFound',
+    'MethodNotAllow',
+    'NotAcceptable',
+    'ProxyAuthenticationRequired',
+    'Timeout',
+    'Conflict',
+    'InternalServerError',
+    'NotImplemented',
+    'BadGateway'
+];
+errorhandlers.forEach(function (h) {
+    HttpStatusProcessor.prototype['on' + h] = function (err) {
+        if (isDev()) {
+            log(err.message);
+        }
+    };
+});
+
+var deepMerge = require('axios/lib/utils');
+var AxiosSugarPrototype = (function () {
+    function AxiosSugarPrototype() {
+        this.httpStatusProcessor = new HttpStatusProcessor();
+    }
+    return AxiosSugarPrototype;
+}());
+var AxiosSugar = (function (_super) {
+    __extends(AxiosSugar, _super);
+    function AxiosSugar(axiosConfig, config) {
+        var _this = _super.call(this) || this;
+        _this.axios = axios.create(axiosConfig);
+        _this.config = config || defaults;
+        _this.events = {};
+        _this.interceptors = {
+            request: new AxiosSugarInterceptorManager(),
+            response: new AxiosSugarInterceptorManager()
+        };
+        initInterceptors(_this);
+        return _this;
+    }
+    return AxiosSugar;
+}(AxiosSugarPrototype));
+AxiosSugar.prototype.create = function (axiosConfig, config) {
+    if (config) {
+        config = deepMerge(defaults, config);
+    }
+    return new AxiosSugar(axiosConfig, config);
+};
+AxiosSugar.prototype.request = function (axiosConfig, config) {
+    if (config) {
+        config = deepMerge(defaults, config);
+    }
+    var chain = [dispatchRequest, undefined];
+    var promise = Promise.resolve({ axios: axiosConfig, config: config });
+    this.interceptors.request.each(function (interceptor) {
+        chain.unshift(interceptor.fulfilled, interceptor.rejected);
+    });
+    this.interceptors.response.each(function (interceptor) {
+        chain.push(interceptor.fulfilled, interceptor.rejected);
+    });
+    while (chain.length) {
+        promise = promise.then(chain.shift(), chain.shift());
+    }
+    return promise;
+};
+AxiosSugar.prototype.repeatTag = repeatTag;
+AxiosSugar.prototype.on = function (event, fn) {
+    this.events[event] = fn;
+};
+AxiosSugar.prototype.off = function (event, fn) {
+    if (this.events[event] === fn) {
+        this.events[event] = undefined;
+        return true;
+    }
+    return false;
+};
+
+var axiosSugar = new AxiosSugar();
+
+exports.HttpStatusProcessor = HttpStatusProcessor;
+exports.default = axiosSugar;

@@ -3,7 +3,7 @@
 <html lang="en">
 
 <head>
-    <title>Code coverage report for src/core/utils.ts</title>
+    <title>Code coverage report for src/core/HttpStatusProcessor.ts</title>
     <meta charset="utf-8" />
     <link rel="stylesheet" href="../../prettify.css" />
     <link rel="stylesheet" href="../../base.css" />
@@ -19,34 +19,34 @@
 <body>
 <div class='wrapper'>
     <div class='pad1'>
-        <h1><a href="../../index.html">All files</a> / <a href="index.html">src/core</a> utils.ts</h1>
+        <h1><a href="../../index.html">All files</a> / <a href="index.html">src/core</a> HttpStatusProcessor.ts</h1>
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">15.56% </span>
+                <span class="strong">71.88% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>7/45</span>
+                <span class='fraction'>23/32</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">0% </span>
+                <span class="strong">41.67% </span>
                 <span class="quiet">Branches</span>
-                <span class='fraction'>0/27</span>
+                <span class='fraction'>5/12</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">12.5% </span>
+                <span class="strong">85.71% </span>
                 <span class="quiet">Functions</span>
-                <span class='fraction'>1/8</span>
+                <span class='fraction'>6/7</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">18.42% </span>
+                <span class="strong">70% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>7/38</span>
+                <span class='fraction'>21/30</span>
             </div>
         
             
@@ -55,7 +55,7 @@
             Press <em>n</em> or <em>j</em> to go to the next uncovered block, <em>b</em>, <em>p</em> or <em>k</em> for the previous block.
         </p>
     </div>
-    <div class='status-line low'></div>
+    <div class='status-line medium'></div>
     <pre><table class="coverage">
 <tr><td class="line-count quiet"><a name='L1'></a><a href='#L1'>1</a>
 <a name='L2'></a><a href='#L2'>2</a>
@@ -131,154 +131,214 @@
 <a name='L72'></a><a href='#L72'>72</a>
 <a name='L73'></a><a href='#L73'>73</a>
 <a name='L74'></a><a href='#L74'>74</a>
-<a name='L75'></a><a href='#L75'>75</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+<a name='L75'></a><a href='#L75'>75</a>
+<a name='L76'></a><a href='#L76'>76</a>
+<a name='L77'></a><a href='#L77'>77</a>
+<a name='L78'></a><a href='#L78'>78</a>
+<a name='L79'></a><a href='#L79'>79</a>
+<a name='L80'></a><a href='#L80'>80</a>
+<a name='L81'></a><a href='#L81'>81</a>
+<a name='L82'></a><a href='#L82'>82</a>
+<a name='L83'></a><a href='#L83'>83</a>
+<a name='L84'></a><a href='#L84'>84</a>
+<a name='L85'></a><a href='#L85'>85</a>
+<a name='L86'></a><a href='#L86'>86</a>
+<a name='L87'></a><a href='#L87'>87</a>
+<a name='L88'></a><a href='#L88'>88</a>
+<a name='L89'></a><a href='#L89'>89</a>
+<a name='L90'></a><a href='#L90'>90</a>
+<a name='L91'></a><a href='#L91'>91</a>
+<a name='L92'></a><a href='#L92'>92</a>
+<a name='L93'></a><a href='#L93'>93</a>
+<a name='L94'></a><a href='#L94'>94</a>
+<a name='L95'></a><a href='#L95'>95</a></td><td class="line-coverage quiet"><span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">2x</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">12x</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">import { AxiosRequestConfig } from '../vendor/axios';
-import { isDef } from '../utils';
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">import { log, isDev } from './utils';
+import { AxiosError } from 'axios/index';
 &nbsp;
-// where the sending data in ? (params or data)
-function <span class="fstat-no" title="function not covered" >sendDataWay </span>(method: string): 'data' | 'params' | 'both' {
-  const isInData = <span class="cstat-no" title="statement not covered" >['post', 'put', 'patch'].indexOf(method) &gt;= 0,</span>
-    isInParams = <span class="cstat-no" title="statement not covered" >method === 'get';</span>
-<span class="cstat-no" title="statement not covered" >  return isInData ? 'data' : (isInParams ? 'params' : 'both');</span>
-}
+class HttpStatusProcessorPrototype {
+  private statusTable: Object;
+  private reservedCodes: string[];
+  [key: string]: any;
 &nbsp;
-export function <span class="fstat-no" title="function not covered" >normalizeProp </span>(config: AxiosRequestConfig, <span class="cstat-no" title="statement not covered" >prop = 'custom'): AxiosRequestConfig {</span>
-  // if custom prop in data
-<span class="cstat-no" title="statement not covered" >  if (sendDataWay(config.method) === 'data' &amp;&amp; config.data) {</span>
-    const propVal = <span class="cstat-no" title="statement not covered" >config.data[prop];</span>
-<span class="cstat-no" title="statement not covered" >    if (propVal) {</span>
-<span class="cstat-no" title="statement not covered" >      config[prop] = propVal;</span>
-<span class="cstat-no" title="statement not covered" >      delete config.data[prop];</span>
+  constructor () {
+    this.statusTable = {
+      200: this.onOk,
+      201: this.onCreated,
+      202: this.onAccepted,
+      203: this.onNonAuthoritativeInformation,
+      204: this.onNoContent,
+      205: this.onResetContent,
+      206: this.onPartialContent,
+      207: this.onMultiStatus,
+      400: this.onBadRequest,
+      401: this.onUnauthorized,
+      403: this.onForbidden,
+      404: this.onNotFound,
+      405: this.onMethodNotAllow,
+      406: this.onNotAcceptable,
+      407: this.onProxyAuthenticationRequired,
+      408: this.onTimeout,
+      409: this.onConflict,
+      500: this.onInternalServerError,
+      501: this.onNotImplemented,
+      502: this.onBadGateway
     }
+&nbsp;
+    this.reservedCodes = Object.keys(this.statusTable);
   }
-<span class="cstat-no" title="statement not covered" >  return config;</span>
-}
 &nbsp;
-export function <span class="fstat-no" title="function not covered" >genSymbol </span>(config: AxiosRequestConfig): string {
-  let { url } = <span class="cstat-no" title="statement not covered" >config;</span>
-  const { method } = <span class="cstat-no" title="statement not covered" >config;</span>
-  // the data send before
-  let data;
-&nbsp;
-  function <span class="fstat-no" title="function not covered" >getParamsSymbolData </span>(params: object): string {
-    let data = <span class="cstat-no" title="statement not covered" >'';</span>
-<span class="cstat-no" title="statement not covered" >    if (/\?/.test(url)) {</span>
-      const part = <span class="cstat-no" title="statement not covered" >url.split('?');</span>
-<span class="cstat-no" title="statement not covered" >      url = part[0];</span>
-<span class="cstat-no" title="statement not covered" >      data += part[1];</span>
+<span class="fstat-no" title="function not covered" >  setStatusHandler </span>(status: string, fn: Function): Boolean {
+<span class="cstat-no" title="statement not covered" >    if (this.reservedCodes.indexOf(status) &lt; 0) {</span>
+<span class="cstat-no" title="statement not covered" >      this.statusTable[status] = fn;</span>
+<span class="cstat-no" title="statement not covered" >      return true;</span>
+    } else <span class="cstat-no" title="statement not covered" >if (isDev()) {</span>
+<span class="cstat-no" title="statement not covered" >      log(`can't set the handler of http status code ${status}.`);</span>
     }
-<span class="cstat-no" title="statement not covered" >    if (params) {</span>
-<span class="cstat-no" title="statement not covered" >      for (const <span class="cstat-no" title="statement not covered" >[k</span>ey<span class="cstat-no" title="statement not covered" >, v</span>al<span class="cstat-no" title="statement not covered" >] </span>of <span class="cstat-no" title="statement not covered" ><span class="cstat-no" title="statement not covered" >Object.</span>entries(params))</span> {</span>
-<span class="cstat-no" title="statement not covered" >        if (data !== '') <span class="cstat-no" title="statement not covered" >data += '&amp;';</span></span>
-<span class="cstat-no" title="statement not covered" >        data += `${key}=${val}`;</span>
-      }
+<span class="cstat-no" title="statement not covered" >    return false;</span>
+  }
+&nbsp;
+  // 分配给对应的函数处理
+  dispatch (status, payload) {
+    const firstCode = status.toString().substr(0, 1);
+    // result
+    let result = payload.response;
+    // onXXXBefore function
+    <span class="missing-if-branch" title="if path not taken" >I</span>if (this[`on${firstCode}XXBefore`]) {
+<span class="cstat-no" title="statement not covered" >      result = this[`on${firstCode}XXBefore`](status, payload, result);</span>
     }
-<span class="cstat-no" title="statement not covered" >    return data;</span>
+    if (this.statusTable[status]) {
+      result = this.statusTable[status](status, payload, result);
+    }
+    <span class="missing-if-branch" title="if path not taken" >I</span>if (this[`on${firstCode}XXAfter`]) {
+<span class="cstat-no" title="statement not covered" >      result = this.statusTable[status](status, payload, result);</span>
+    }
+    return result;
   }
-&nbsp;
-  function <span class="fstat-no" title="function not covered" >getDataSymbolData </span>(data: object): string {
-<span class="cstat-no" title="statement not covered" >    return isDef(data) ? JSON.stringify(data) : '';</span>
-  }
-&nbsp;
-  // get the sent data
-<span class="cstat-no" title="statement not covered" >  switch (sendDataWay(method)) {</span>
-    case 'params':
-<span class="cstat-no" title="statement not covered" >      data = getParamsSymbolData(config.params);</span>
-<span class="cstat-no" title="statement not covered" >      break;</span>
-    case 'data':
-<span class="cstat-no" title="statement not covered" >      data = getDataSymbolData(config.data);</span>
-<span class="cstat-no" title="statement not covered" >      break;</span>
-    case 'both':
-<span class="cstat-no" title="statement not covered" >      data = getParamsSymbolData(config.params) || getDataSymbolData(config.params);</span>
-  }
-&nbsp;
-<span class="cstat-no" title="statement not covered" >  return `method=${method}&amp;url=${url}&amp;data=${data}`;</span>
 }
 &nbsp;
-export function <span class="fstat-no" title="function not covered" >notUndef&lt;</span>T = any, D = any&gt; (targetVal: T, defaultVal: D): T | D {
-<span class="cstat-no" title="statement not covered" >  return typeof targetVal === 'undefined' ? defaultVal : targetVal;</span>
-}
+/**
+ * 处理错误的类
+ */
+class HttpStatusProcessor extends HttpStatusProcessorPrototype {}
 &nbsp;
-export function <span class="fstat-no" title="function not covered" >log </span>(msg: string) {
-<span class="cstat-no" title="statement not covered" >  console.log(`[axios-sugar]: ${msg}.`);</span>
-}
+const errorhandlers = [
+  'BadRequest',
+  'Unauthorized',
+  'Forbidden',
+  'NotFound',
+  'MethodNotAllow',
+  'NotAcceptable',
+  'ProxyAuthenticationRequired',
+  'Timeout',
+  'Conflict',
+  'InternalServerError',
+  'NotImplemented',
+  'BadGateway'
+];
 &nbsp;
-export function isDev () {
-  return process.env.NODE_ENV === 'development';
-}
+errorhandlers.forEach(h =&gt; {
+  HttpStatusProcessor.prototype['on' + h] = function (status, err, result): AxiosError {
+    <span class="missing-if-branch" title="if path not taken" >I</span>if (isDev()) {
+<span class="cstat-no" title="statement not covered" >      log(err.message);</span>
+    }
+    return err.reason;
+  };
+});
+&nbsp;
+export default HttpStatusProcessor;
 &nbsp;</pre></td></tr></table></pre>
 
                 <div class='push'></div><!-- for sticky footer -->
