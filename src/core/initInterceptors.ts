@@ -7,13 +7,11 @@ import storage from './storage';
 
 export default function initInterceptors (axiosSugar: AxiosSugar) {
   axiosSugar.interceptors.request.use((config: MiddleRequestConfig) => {
+
     MiddleData.configs.push(config);
 
     // handle repeated requests
     config.index = repeat.bind(axiosSugar, config);
-
-    // handle storage
-    storage.get(config);
 
     return config;
   }, (err: Error) => {
@@ -39,7 +37,7 @@ export default function initInterceptors (axiosSugar: AxiosSugar) {
       }
     }
 
-    return axiosSugar.httpStatusProcessor.dispatch.call(this, config.response.status, config);
+    return axiosSugar.httpStatusProcessor.dispatch(this, config.response.status.toString(), config);
   }, (err: MiddleResponseError) => {
     let result = err;
 
@@ -57,8 +55,8 @@ export default function initInterceptors (axiosSugar: AxiosSugar) {
     }
 
     // only handle http-status-code error
-    if (err.reason.response) {
-      result = axiosSugar.httpStatusProcessor.dispatch.call(this, err.reason.response.status, err);
+    if (err.reason && err.reason.response) {
+      result = axiosSugar.httpStatusProcessor.dispatch(this, err.reason.response.status.toString(), err);
     }
 
     return result instanceof Promise ? result : Promise.reject(result || err);

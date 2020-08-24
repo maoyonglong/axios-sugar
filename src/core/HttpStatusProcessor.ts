@@ -9,8 +9,8 @@ interface retry {
 }
 
 class HttpStatusProcessorPrototype {
-  private statusTable: Object;
-  private reservedCodes: string[];
+  protected statusTable: Object;
+  protected reservedCodes: string[];
   [key: string]: any;
 
   constructor () {
@@ -51,7 +51,7 @@ class HttpStatusProcessorPrototype {
   }
 
   // disptach to status handlers
-  dispatch (status: string, payload: MiddleResponseError | MiddleResponseConfig) {
+  dispatch (axiosSugar: AxiosSugar, status: string, payload: MiddleResponseError | MiddleResponseConfig) {
     const firstCode = status.toString().substr(0, 1);
     // expect a response
     // if payload is an error, the result will be undefined,
@@ -79,13 +79,13 @@ class HttpStatusProcessorPrototype {
 
     // onXXXBefore function
     if (this[`on${firstCode}XXBefore`]) {
-      result = this[`on${firstCode}XXBefore`].call(this, status, payload, result, retry);
+      result = this[`on${firstCode}XXBefore`].call(axiosSugar, status, payload, result, retry);
     }
     if (this.statusTable[status]) {
-      result = this.statusTable[status].call(this, status, payload, result, retry);
+      result = this.statusTable[status].call(axiosSugar, status, payload, result, retry);
     }
     if (this[`on${firstCode}XXAfter`]) {
-      result = this.statusTable[status].call(this, status, payload, result, retry);
+      result = this.statusTable[status].call(axiosSugar, status, payload, result, retry);
     }
     
     return retriedRequest || result;

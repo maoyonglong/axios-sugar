@@ -1,5 +1,6 @@
 import { AxiosRequestConfig, AxiosError, AxiosResponse } from 'axios/index';
 import { AxiosSugarConfig } from '../defaults';
+import storage from './storage';
 
 export interface MiddleRequestConfig {
   axios: AxiosRequestConfig;
@@ -8,6 +9,7 @@ export interface MiddleRequestConfig {
   count?: number;
   cancelDisabled?: Boolean;
   sendingTime: number;
+  cacheTime?: number;
 }
 
 export interface MiddleResponseConfig {
@@ -15,6 +17,7 @@ export interface MiddleResponseConfig {
   sugar: AxiosSugarConfig;
   index: number;
   sendingTime: number;
+  cacheTime?: number;
 }
 
 export interface MiddleResponseError {
@@ -25,21 +28,38 @@ export interface MiddleResponseError {
   index: number;
   count?: number;
   sendingTime: number;
+  cacheTime?: number;
+  isAxiosSugarError: Boolean;
 }
 
-export default function (config: MiddleRequestConfig) {
+export default function (
+  config: MiddleRequestConfig
+): Promise<MiddleResponseConfig | MiddleResponseError> {
+  const cache = config.sugar.save.enable ? storage.get(config) : null;
   config.sendingTime = new Date().getTime();
 
-  return this.axios.request(config.axios).then((response) => ({
-    response,
-    sugar: config.sugar,
-    index: config.index
-  }), (reason) => Promise.reject({
-    reason,
-    axios: config.axios,
-    index: config.index,
-    sugar: config.sugar,
-    count: config.count,
-    sendingTime: config.sendingTime
-  }));
+  if (cache !== null) {
+    return Promise.resolve({
+      response: cache.response,
+      sugar: config.sugar,
+      index: config.index,
+      sendingTime: config.sendingTime,
+      cacheTime: cache.time
+    })
+  } else {
+    return this.axios.request(config.axios).then((response) => ({
+      response,
+      sugar: config.sugar,
+      index: config.index,
+      sendingTime: config.sendingTime
+    }), (reason) => Promise.reject({
+      reason,
+      axios: config.axios,
+      index: config.index,
+      sugar: config.sugar,
+      count: config.count,
+      sendingTime: config.sendingTime,
+      isAxiosSugarError: true
+    }));
+  }
 }

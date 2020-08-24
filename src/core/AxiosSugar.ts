@@ -1,5 +1,5 @@
 import defaults, { AxiosSugarConfig } from '../defaults';
-import axios from 'axios'
+import axios from 'axios';
 import { AxiosSugarInterceptorManager } from './AxiosSugarInterceptorManager';
 import { AxiosRequestConfig, AxiosError, AxiosInstance } from 'axios/index';
 import dispatchRequest, { MiddleRequestConfig } from './dispatchRequest'
@@ -7,7 +7,7 @@ import initInterceptors from './initInterceptors';
 import { repeatTag } from './repeat';
 import HttpStatusProcessor from './HttpStatusProcessor';
 import MiddleData from './MiddleData';
-import { isFn } from './utils';
+import { isFn, isNum, isStr } from './utils';
 import { deepMerge, merge } from './utils';
 import { MiddleResponseError } from './dispatchRequest';
 
@@ -24,12 +24,12 @@ type Events = {
   [key in Event]: Function;
 } | {};
 
+
 class AxiosSugarPrototype {
   defaults: AxiosSugarConfig;
   axiosDefaults: AxiosRequestConfig;
   httpStatusProcessor: HttpStatusProcessor;
   create: (axiosConfig?: AxiosRequestConfig, config?: AxiosSugarConfig) => AxiosSugar;
-  request: (axiosConfig?: AxiosRequestConfig | MiddleResponseError, config?: AxiosSugarConfig) => Promise<any>;
   get: (url: string, axiosConfig?: AxiosRequestConfig, config?: AxiosSugarConfig) => Promise<any>;
   post: (url: string, axiosConfig?: AxiosRequestConfig, config?: AxiosSugarConfig) => Promise<any>;
   head: (url: string, axiosConfig?: AxiosRequestConfig, config?: AxiosSugarConfig) => Promise<any>;
@@ -49,6 +49,56 @@ class AxiosSugarPrototype {
     this.defaults = defaults;
     this.axiosDefaults = axios.defaults;
   }
+
+  request (axiosConfig: AxiosRequestConfig | MiddleResponseError, config?: AxiosSugarConfig): Promise<any>;
+  request (url: string, axiosConfig?: AxiosRequestConfig | MiddleResponseError, config?: AxiosSugarConfig): Promise<any>;
+  request (...args): Promise<any> {
+    let axiosConfig: AxiosRequestConfig | MiddleResponseError;
+    let config: AxiosSugarConfig;
+    const _this = this as unknown as AxiosSugar
+
+    if (isStr(args[0])) {
+      axiosConfig = args[1] || {};
+      (axiosConfig as AxiosRequestConfig).url = args[0];
+      config = args[2];
+    } else {
+      axiosConfig = args[0] || {};
+      config = args[1];
+    }
+
+    config = config ? deepMerge(defaults, config) : _this.config;
+  
+    const chain = [dispatchRequest.bind(this), undefined];
+  
+    const middleResponseError = (axiosConfig as MiddleResponseError);
+
+    const data = middleResponseError.isAxiosSugarError ? {
+      axios: middleResponseError.axios,
+      sugar: middleResponseError.sugar,
+      count: isNum(middleResponseError.count) ? ++middleResponseError.count : middleResponseError.count
+    } : {
+      axios: axiosConfig,
+      sugar: config,
+      cancelDisabled: false
+    };
+  
+    // dispatch data to dispatchRequest and interceptors
+    let promise: Promise<any> = Promise.resolve(data);
+  
+    _this.interceptors.request.each((interceptor) => {
+      chain.unshift(interceptor.fulfilled, interceptor.rejected);
+    })
+  
+    _this.interceptors.response.each((interceptor) => {
+      chain.push(interceptor.fulfilled, interceptor.rejected);
+    })
+  
+    while (chain.length) {
+      promise = promise.then(chain.shift(), chain.shift());
+    }
+    
+    return promise;
+  }
 }
 
 export class AxiosSugar extends AxiosSugarPrototype {
@@ -56,11 +106,9 @@ export class AxiosSugar extends AxiosSugarPrototype {
   interceptors: Interceptors;
   config: AxiosSugarConfig;
   events: Events;
-  // 兼容axios的axios.get()和axios.get('', {})的写法，只在后面添加一个自定义的参数
-  // axiosSugar.get({}, {timeout: 1000})和axios.get('', {}, {timeout: 1000})
+  // e.g. axiosSugar.get({}, {timeout: 1000})
   constructor (axiosConfig?: AxiosRequestConfig, config?: AxiosSugarConfig) {
     super();
-    // config.axios可以是undefined
     this.axios = axios.create(axiosConfig);
     this.config = config || Object.assign({}, defaults);
     this.events = {};
@@ -68,7 +116,7 @@ export class AxiosSugar extends AxiosSugarPrototype {
       request: new AxiosSugarInterceptorManager(),
       response: new AxiosSugarInterceptorManager()
     };
-    // 初始化当前拦截器
+
     initInterceptors(this);
   }
 }
@@ -81,45 +129,6 @@ AxiosSugar.prototype.create = function (
     config = deepMerge(defaults, config);
   }
   return new AxiosSugar(axiosConfig, config);
-};
-
-AxiosSugar.prototype.request = function (
-  // MiddleResponseError is used to retry
-  axiosConfig?: AxiosRequestConfig | MiddleResponseError,
-  config?: AxiosSugarConfig
-): Promise<any> {
-  config = config ? deepMerge(defaults, config) : this.config;
-
-  const chain = [dispatchRequest.bind(this), undefined];
-
-  const middleResponseError = (axiosConfig as MiddleResponseError);
-
-  const data = middleResponseError.count ? {
-    axios: axiosConfig,
-    sugar: config,
-    cancelDisabled: false
-  } : {
-    axios: middleResponseError.axios,
-    sugar: middleResponseError.sugar,
-    count: ++middleResponseError.count
-  }
-
-  // dispatch data to dispatchRequest and interceptors
-  let promise: Promise<any> = Promise.resolve(data);
-
-  this.interceptors.request.each((interceptor) => {
-    chain.unshift(interceptor.fulfilled, interceptor.rejected);
-  })
-
-  this.interceptors.response.each((interceptor) => {
-    chain.push(interceptor.fulfilled, interceptor.rejected);
-  })
-
-  while (chain.length) {
-    promise = promise.then(chain.shift(), chain.shift());
-  }
-  
-  return promise;
 };
 
 ['delete', 'get', 'head', 'options'].forEach(function (method) {
