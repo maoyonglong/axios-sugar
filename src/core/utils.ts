@@ -16,6 +16,10 @@ export function isStr (value: any): boolean {
   return typeof value === 'string';
 }
 
+export function isError (value) {
+  return value instanceof Error;
+}
+
 export function getDurationMS (a: number, b: number): number {
   return a - b;
 }
@@ -68,7 +72,7 @@ interface onlineOptions {
   timeout?: number
 }
 
-export function isOnline (options: onlineOptions = {}) {
+export function isOnline (options: onlineOptions = {timeout: 5000}) {
   return isOnlineFn({
     timeout: options.timeout
   });

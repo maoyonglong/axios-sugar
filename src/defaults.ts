@@ -5,7 +5,7 @@ interface repeat {
 }
 
 interface retry {
-  auto: Boolean;
+  auto?: Boolean;
   enable?: Boolean;
   count?: number;
   delay?: number;
@@ -21,9 +21,15 @@ interface reconnect {
   delay?: number;
 }
 
-export interface AxiosSugarConfig {
-  repeat: repeat;
+interface onlineCheck {
+  enable?: Boolean;
+  timeout?: number;
   reconnect?: reconnect;
+}
+
+export interface AxiosSugarConfig {
+  onlineCheck: onlineCheck;
+  repeat?: repeat;
   retry?: retry;
   save?: save;
 }
@@ -32,16 +38,20 @@ const defaults: AxiosSugarConfig = {
   repeat: {
     interval: 2000
   },
-  reconnect: {
+  onlineCheck: {
     enable: true,
-    delay: 5000
+    timeout: 5000,
+    reconnect: {
+      enable: true,
+      delay: 5000
+    }
   },
   save: {
     enable: false,
     storage:  new AxiosSugarInnerStorage()
   },
   retry: {
-    enable: true,
+    enable: false,
     auto: true,
     count: 3,
     delay: 2000

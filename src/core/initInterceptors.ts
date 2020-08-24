@@ -1,9 +1,11 @@
 import { AxiosSugar } from './AxiosSugar';
 import { MiddleRequestConfig, MiddleResponseConfig, MiddleResponseError } from './dispatchRequest';
 import MiddleData from './MiddleData';
-import { isFn } from './utils';
+import { isFn, isDef } from './utils';
 import repeat, { isInInterval } from './repeat';
 import storage from './storage';
+import { AxiosError } from 'axios';
+import normalize from './normalizeHttpStatusProcessorResult';
 
 export default function initInterceptors (axiosSugar: AxiosSugar) {
   axiosSugar.interceptors.request.use((config: MiddleRequestConfig) => {
@@ -11,7 +13,7 @@ export default function initInterceptors (axiosSugar: AxiosSugar) {
     MiddleData.configs.push(config);
 
     // handle repeated requests
-    config.index = repeat.bind(axiosSugar, config);
+    config.index = repeat.call(axiosSugar, config);
 
     return config;
   }, (err: Error) => {
@@ -37,9 +39,13 @@ export default function initInterceptors (axiosSugar: AxiosSugar) {
       }
     }
 
-    return axiosSugar.httpStatusProcessor.dispatch(this, config.response.status.toString(), config);
+    return axiosSugar.httpStatusProcessor.dispatch(
+      axiosSugar,
+      config.response.status.toString(),
+      config
+    );
   }, (err: MiddleResponseError) => {
-    let result = err;
+    let result: any = err;
 
     // destory middle data about this request
     if (
@@ -55,10 +61,16 @@ export default function initInterceptors (axiosSugar: AxiosSugar) {
     }
 
     // only handle http-status-code error
-    if (err.reason && err.reason.response) {
-      result = axiosSugar.httpStatusProcessor.dispatch(this, err.reason.response.status.toString(), err);
+    if (err.reason && (err.reason as AxiosError).response) {
+      result = axiosSugar.httpStatusProcessor.dispatch(
+        axiosSugar,
+        (err.reason as AxiosError).response.status.toString(),
+        err
+      );
     }
 
+    result = normalize(result);
+    
     return result instanceof Promise ? result : Promise.reject(result || err);
   });
 }

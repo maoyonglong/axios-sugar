@@ -1,5 +1,5 @@
 import { MiddleResponseError } from './dispatchRequest';
-import { isNum } from './utils';
+import { isNum, isFn } from './utils';
 import { AxiosSugar } from './AxiosSugar';
 
 export default function (config: MiddleResponseError) {
@@ -20,7 +20,12 @@ export default function (config: MiddleResponseError) {
      }, config.sugar.retry.delay);
     });
   } else {
-    _this.events['retryFailed'].call(_this, config);
+    const retryFailed = _this.events['retryFailed'];
+
+    if (isFn(retryFailed)) {
+      retryFailed.call(_this, config);
+    }
+
     return Promise.reject(config);
   }
 }

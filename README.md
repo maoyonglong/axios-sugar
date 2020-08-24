@@ -5,7 +5,7 @@
 ![license](https://img.shields.io/badge/license-MIT-brightgreen)
 
 # AxiosSugar
-An axios wrapper, which supports resending, storage, cancel repeated request automatically; and so on.
+An wrapper for axios.js
 
 # Carefully
 The new version has significant changes and is not compatible with the old version.    
@@ -17,15 +17,15 @@ Compared with the old version, it is used in a very similar way to Axios.
 * Retry
 * Response Storage
 * Broken Metwork Retransmission
-* Handlers for Http-Status-Code Response
+* Handlers for Http-Status-Code Responses
 * Cancel All Requests Matched By Filter
 
 # Usage
 ```js
-import axiosSugar from 'axios-sugar';
+import AxiosSugar from 'axios-sugar';
 
 // suppose the request returns paramA
-axiosSugar.get('/somePath', {
+AxiosSugar.get('/somePath', {
   params: {
     paramA: 1
   }
@@ -38,7 +38,7 @@ Look, it's really like Axios！The *request*, *get*, *post*, *delete*, *put*, *p
 The difference is that these methods also receive an [AxiosSugarConfig](#AxiosSugarConfig) type parameter.
 e.g.  
 ```js
-axiosSugar.get('/somePath'， {
+AxiosSugar.get('/somePath'， {
   params: {
     paramA: 1
   }

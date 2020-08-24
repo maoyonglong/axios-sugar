@@ -26,10 +26,7 @@ type Events = {
 
 
 class AxiosSugarPrototype {
-  defaults: AxiosSugarConfig;
-  axiosDefaults: AxiosRequestConfig;
   httpStatusProcessor: HttpStatusProcessor;
-  create: (axiosConfig?: AxiosRequestConfig, config?: AxiosSugarConfig) => AxiosSugar;
   get: (url: string, axiosConfig?: AxiosRequestConfig, config?: AxiosSugarConfig) => Promise<any>;
   post: (url: string, axiosConfig?: AxiosRequestConfig, config?: AxiosSugarConfig) => Promise<any>;
   head: (url: string, axiosConfig?: AxiosRequestConfig, config?: AxiosSugarConfig) => Promise<any>;
@@ -37,17 +34,9 @@ class AxiosSugarPrototype {
   delete: (url: string, axiosConfig?: AxiosRequestConfig, config?: AxiosSugarConfig) => Promise<any>;
   put: (url: string, axiosConfig?: AxiosRequestConfig, config?: AxiosSugarConfig) => Promise<any>;
   patch: (url: string, axiosConfig?: AxiosRequestConfig, config?: AxiosSugarConfig) => Promise<any>;
-  on: (event: Event, fn: Function) => void;
-  off: (event: Event, fn: Function) => Boolean;
-  repeatTag: (axiosConfig?: AxiosRequestConfig, config?: AxiosSugarConfig) => string;
-  isCancel: (err: AxiosError) => Boolean;
-  cancelAll: () => void;
-  cancelFilter: (cancelConfigs: Array<CancelConfig>) => Array<CancelConfig>;
 
   constructor () {
     this.httpStatusProcessor = new HttpStatusProcessor();
-    this.defaults = defaults;
-    this.axiosDefaults = axios.defaults;
   }
 
   request (axiosConfig: AxiosRequestConfig | MiddleResponseError, config?: AxiosSugarConfig): Promise<any>;
@@ -121,16 +110,6 @@ export class AxiosSugar extends AxiosSugarPrototype {
   }
 }
 
-AxiosSugar.prototype.create = function (
-  axiosConfig?: AxiosRequestConfig,
-  config?: AxiosSugarConfig
-): AxiosSugar {
-  if (config) {
-    config = deepMerge(defaults, config);
-  }
-  return new AxiosSugar(axiosConfig, config);
-};
-
 ['delete', 'get', 'head', 'options'].forEach(function (method) {
   AxiosSugar.prototype[method] = function (
     url: string,
@@ -158,13 +137,42 @@ AxiosSugar.prototype.create = function (
   };
 });
 
-AxiosSugar.prototype.repeatTag = repeatTag;
+export class AxiosSugarStatic extends AxiosSugar {
+  defaults: AxiosSugarConfig;
+  axiosDefaults: AxiosRequestConfig;
+  AxiosSugar: AxiosSugar;
+  create: (axiosConfig?: AxiosRequestConfig, config?: AxiosSugarConfig) => AxiosSugar;
+  on: (event: Event, fn: Function) => void;
+  off: (event: Event, fn: Function) => Boolean;
+  repeatTag: (axiosConfig?: AxiosRequestConfig, config?: AxiosSugarConfig) => string;
+  isCancel: (err: AxiosError) => Boolean;
+  cancelAll: () => void;
+  cancelFilter: (cancelConfigs: Array<CancelConfig>) => Array<CancelConfig>;
 
-AxiosSugar.prototype.on = function (event: Event, fn: Function) {
+  constructor () {
+    super();
+    this.defaults = defaults;
+    this.axiosDefaults = axios.defaults;
+  }
+}
+
+AxiosSugarStatic.prototype.create = function (
+  axiosConfig?: AxiosRequestConfig,
+  config?: AxiosSugarConfig
+): AxiosSugar {
+  if (config) {
+    config = deepMerge(defaults, config);
+  }
+  return new AxiosSugar(axiosConfig, config);
+};
+
+AxiosSugarStatic.prototype.repeatTag = repeatTag;
+
+AxiosSugarStatic.prototype.on = function (event: Event, fn: Function) {
   this.events[event] = fn;
 };
 
-AxiosSugar.prototype.off = function (event: Event, fn: Function): Boolean {
+AxiosSugarStatic.prototype.off = function (event: Event, fn: Function): Boolean {
   if (this.events[event] === fn) {
     this.events[event] = undefined;
     return true;
@@ -172,7 +180,7 @@ AxiosSugar.prototype.off = function (event: Event, fn: Function): Boolean {
   return false;
 }
 
-AxiosSugar.prototype.isCancel = function (err: AxiosError): Boolean {
+AxiosSugarStatic.prototype.isCancel = function (err: AxiosError): Boolean {
   return axios.isCancel(err);
 }
 
@@ -181,7 +189,7 @@ interface CancelConfig {
   config: MiddleRequestConfig;
 }
 
-AxiosSugar.prototype.cancelAll = function (): void {
+AxiosSugarStatic.prototype.cancelAll = function (): void {
   let cancelConfigs: Array<CancelConfig> = [];
   MiddleData.configs.map(c => {
     if (c !== null) {
@@ -201,6 +209,6 @@ AxiosSugar.prototype.cancelAll = function (): void {
   });
 }
 
-AxiosSugar.prototype.cancelFilter = function (cancelConfigs: Array<CancelConfig>): Array<CancelConfig> {
+AxiosSugarStatic.prototype.cancelFilter = function (cancelConfigs: Array<CancelConfig>): Array<CancelConfig> {
   return cancelConfigs.filter((c) => !c.config.cancelDisabled);
 }

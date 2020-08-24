@@ -1,4 +1,4 @@
-import { error, isDev, warn, isOnline } from './utils';
+import { error, isDev, warn, isOnline, isFn } from './utils';
 import { AxiosError } from 'axios/index';
 import retryFn from './retry';
 import { MiddleResponseConfig, MiddleResponseError } from './dispatchRequest';
@@ -67,7 +67,7 @@ class HttpStatusProcessorPrototype {
     ) ? function () {
       if (!isRetried) {
         isRetried = true;
-        retriedRequest = retryFn.call(this, payload);
+        retriedRequest = retryFn.call(axiosSugar, payload);
 
         return true;
       } else if (isDev()) {
@@ -109,7 +109,7 @@ const errorhandlers = [
   'BadGateway'
 ];
 
-function autoRetry (axiosSugar: AxiosSugar, err: MiddleResponseError,retry: retry) {
+function autoRetry (axiosSugar: AxiosSugar, err: MiddleResponseError, retry: retry) {
   if (retry && err.sugar.retry.auto) {
     // retry() returns true means that has been already retried
     if (retry()) {
@@ -134,30 +134,52 @@ errorhandlers.forEach(h => {
 
     autoRetry((this as AxiosSugar), err, retry);
 
-    return err.reason;
+    return err.reason as AxiosError;
   };
 });
 
-HttpStatusProcessor.prototype['onTimeout'] = function (
+HttpStatusProcessor.prototype['onTimeout'] = async function (
   status: string,
   err: MiddleResponseError,
   result: any,
   retry?: retry
-): AxiosError {
-  if (isOnline()) {
-    this.events['onlineTimeout'].call(this, err);
-    autoRetry((this as AxiosSugar), err, retry);
+): Promise<AxiosError> {
+  const onlineCheck = err.sugar.onlineCheck
+
+  if (onlineCheck.enable) {
+    if (await isOnline({
+      timeout: onlineCheck.timeout
+    })) {
+      if (isDev()) {
+        error(`online but timeout`);
+      }
+      const onlineTimeout = this.events['onlineTimeout'];
+      if (isFn(onlineTimeout)) {
+        this.events['onlineTimeout'].call(this, err);
+      }
+      autoRetry((this as AxiosSugar), err, retry);
+    } else {
+      if (isDev()) {
+        error(`offline`);
+      }
+      const offline = this.events['offline'];
+      if (isFn(offline)) {
+        this.events['offline'].call(this, err);
+      }
+      // retry when online
+      if (onlineCheck.reconnect.enable) {
+        err.offlineTimer = setInterval(() => {
+          autoRetry((this as AxiosSugar), err, retry);
+        }, onlineCheck.reconnect.delay);
+      }
+    }
   } else {
-    this.events['offline'].call(this, err);
-    // retry when online
-    if (err.sugar.reconnect.enable) {
-      err.offlineTimer = setInterval(() => {
-        autoRetry((this as AxiosSugar), err, retry);
-      }, err.sugar.reconnect.delay);
+    if (isDev()) {
+      error(err.reason.message);
     }
   }
 
-  return err.reason;
+  return err.reason as AxiosError;
 }
 
 export default HttpStatusProcessor;

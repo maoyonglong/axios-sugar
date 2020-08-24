@@ -1,10 +1,9 @@
-import { AxiosSugar } from './core/AxiosSugar';
+import { AxiosSugarStatic, AxiosSugar } from './core/AxiosSugar';
 import HttpStatusProcessor from './core/HttpStatusProcessor';
 
-const axiosSugar = new AxiosSugar();
-
-export default axiosSugar;
+export default new AxiosSugarStatic();
 
 export {
-  HttpStatusProcessor
+  HttpStatusProcessor,
+  AxiosSugar
 };
