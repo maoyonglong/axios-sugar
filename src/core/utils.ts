@@ -1,7 +1,7 @@
 import {
   deepMerge as deepMergeFn,
   merge as mergeFn
-} from '../vendor/axios/utils.js';
+} from '../vendor/axios/utils';
 
 export function capitalize (str: string): string {
   return str.substring(0, 1).toUpperCase() + str.substring(1);
