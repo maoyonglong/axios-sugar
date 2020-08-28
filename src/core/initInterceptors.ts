@@ -1,6 +1,6 @@
 import { AxiosSugar } from './AxiosSugar';
 import { MiddleRequestConfig, MiddleResponseConfig, MiddleResponseError } from './dispatchRequest';
-import MiddleData from './MiddleData';
+import MiddleData, { dataDestory } from './MiddleData';
 import { isFn, isDef } from './utils';
 import repeat, { isInInterval } from './repeat';
 import storage from './storage';
@@ -30,13 +30,8 @@ export default function initInterceptors (axiosSugar: AxiosSugar) {
     }
 
     // destory middle data about this request
-    if (isInInterval(config.sendingTime, config.sugar.repeat.interval)) {
-      MiddleData.configs[config.index] = null;
-
-      if (MiddleData.tags[config.index] !== null) {
-        MiddleData.tags[config.index] = null;
-        MiddleData.cancels[config.index] = null;
-      }
+    if (!isInInterval(config.sendingTime, config.completeTime, config.sugar.repeat.interval)) {
+      dataDestory(config.index);
     }
 
     return axiosSugar.httpStatusProcessor.dispatch(
@@ -44,20 +39,15 @@ export default function initInterceptors (axiosSugar: AxiosSugar) {
       config.response.status.toString(),
       config
     );
-  }, (err: MiddleResponseError) => {
+  }, (err) => {
     let result: any = err;
 
     // destory middle data about this request
     if (
-      err.reason &&
-      isInInterval(err.sendingTime, err.sugar.repeat.interval)
+      (err.reason &&
+      !isInInterval(err.sendingTime, err.completeTime, err.sugar.repeat.interval))
     ) {
-      MiddleData.configs[err.index] = null;
-
-      if (MiddleData.tags[err.index] !== null) {
-        MiddleData.tags[err.index] = null;
-        MiddleData.cancels[err.index] = null;
-      }
+      dataDestory(err.index);
     }
 
     // only handle http-status-code error
@@ -70,6 +60,11 @@ export default function initInterceptors (axiosSugar: AxiosSugar) {
     }
 
     result = normalize(result);
+
+    // delete middle data when encountered repeated request
+    if (result instanceof Promise && err.count >= 1) {
+      dataDestory(err.index);
+    }
     
     return result instanceof Promise ? result : Promise.reject(result || err);
   });

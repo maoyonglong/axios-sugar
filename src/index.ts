@@ -1,9 +1,16 @@
-import { AxiosSugarStatic, AxiosSugar } from './core/AxiosSugar';
+import { SugarStatic, AxiosSugar } from './core/AxiosSugar';
 import HttpStatusProcessor from './core/HttpStatusProcessor';
+import { AxiosSugarInnerStorage, AxiosSugarLocalStorage } from './core/AxiosSugarStorage';
 
-export default new AxiosSugarStatic();
+export default SugarStatic;
+
+const storage = {
+  inner: AxiosSugarInnerStorage,
+  local: AxiosSugarLocalStorage
+};
 
 export {
   HttpStatusProcessor,
-  AxiosSugar
-};
+  AxiosSugar,
+  storage
+}

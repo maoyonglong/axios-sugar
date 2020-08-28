@@ -40,16 +40,15 @@ function transformSyncData (data) {
   switch (dataType(data)) {
     case 'undefined': return;
     case 'error': return new ReasonError(data);
-    case 'reasonError': return data;
-    default: return 'promise';
+    default: return data;
   }
 }
 
 export default (data) => {
   const result = transformSyncData(data);
 
-  if (result === 'promise') {
-    return data.then(
+  if (result instanceof Promise) {
+    return result.then(
       (data) => transformSyncData(data),
       (data) => transformSyncData(data)
     );

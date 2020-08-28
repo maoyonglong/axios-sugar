@@ -10,6 +10,7 @@
     "es-lint": "npx eslint src/**/*.ts",
     "es-fix": "npx eslint --fix src/**/*.ts",
     "test": "npx mocha --reporter spec --require ts-node/register test/**/*.test.ts",
+    "testone": "npx mocha --reporter spec --require ts-node/register",
     "publish": "npm publish --registry https://registry.npmjs.org",
     "cover": "npx nyc npm test",
     "coveralls": "npx nyc npm test && npx nyc report --reporter=text-lcov | coveralls"

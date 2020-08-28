@@ -5,29 +5,28 @@
 ![license](https://img.shields.io/badge/license-MIT-brightgreen)
 
 # Locales
-[简体中文](./locales/README-zh.md)
+[English](../README.md)
 
 # AxiosSugar
-An wrapper for axios.js
+axios.js的二次封装库
 
 # Carefully
-The new version has significant changes and is not compatible with the old version.    
-Compared with the old version, it is used in a very similar way to Axios.
+该新版本有很大的改变，和旧版不兼容。它的特点是用法上和axios很相像。
 
 # Features
-* Axios-Like Methods 
-* Cancel Repeated Requests
-* Retry
-* Response Storage
-* Broken Network Retransmission
-* Handlers for Http-Status-Code Responses
-* Cancel All Requests Matched By Filter
+* 类axios的方法
+* 取消重复请求
+* 重试
+* 响应存储器
+* 断网重传
+* Http状态代码响应的处理程序
+* 取消筛选器匹配的所有请求
 
 # Usage
 ```js
 import AxiosSugar from 'axios-sugar';
 
-// suppose the request returns paramA
+// 假设请求返回paramA
 AxiosSugar.get('/somePath', {
   params: {
     paramA: 1
@@ -36,10 +35,10 @@ AxiosSugar.get('/somePath', {
   console.log(res.data); // 1
 })
 ```
-Look, it's really like Axios！The *request*, *get*, *post*, *delete*, *put*, *patch*, *head*, *options* is also.  
+它的用法和axios.js真的很类似！其它的像*request*, *get*, *post*, *delete*, *put*, *patch*, *head*, *options*的一些方法也一样。
   
-The difference is that these methods also receive an [AxiosSugarConfig](https://maoyonglong.github.io/guide/configuration) type parameter.
-e.g.  
+不同的是，除了axios方法原来接收的参数，这些请求方法还接收另一个类型为[AxiosSugarConfig](https://myl970421.gitee.io/axios-sugar-docs/zh/guide/configuration)的参数。
+例如：
 ```js
 AxiosSugar.get('/somePath'， {
   params: {
@@ -51,7 +50,7 @@ AxiosSugar.get('/somePath'， {
   }
 })
 ```
-Next, you should get more details in [references](https://maoyonglong.github.io/axios-sugar-docs/guide)
+接下来，你应该查看 [参考指南](https://myl970421.gitee.io/axios-sugar-docs/zh/guide)
 
 # Test
 **Node test**:

@@ -60,6 +60,10 @@ export function isNum (val) {
   return typeof val === 'number';
 }
 
+export function isPlainObject (val) {
+  return typeof val === 'object' && val !== null && !Array.isArray(val);
+}
+
 export function deepMerge (...args) {
   return deepMergeFn.apply(null, args);
 }

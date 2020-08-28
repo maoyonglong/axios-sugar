@@ -3,8 +3,10 @@ import sizeof from 'object-sizeof';
 import { StorageData } from './storage';
 
 export interface AxiosSugarStorage {
-  set (tag: string, res: StorageData): Boolean;
-  get (tag: string): StorageData | null;
+  data: {[key: string]: StorageData};
+  set: (tag: string, data: StorageData) => Boolean;
+  get: (tag: string) => StorageData | null;
+  [key: string]: any;
 }
 
 interface InnerStorageConfig {
@@ -21,13 +23,14 @@ const innerStorageDefaults: InnerStorageConfig = {
 
 export class AxiosSugarInnerStorage implements AxiosSugarStorage {
   config: InnerStorageConfig;
-  data: {[key: string]: StorageData} = {};
+  data: {[key: string]: StorageData};
 
   constructor (config?: InnerStorageConfig) {
+    this.data = {};
     this.config = config ? merge(innerStorageDefaults, config) : innerStorageDefaults;
   }
 
-  private release (tag: string, res?: StorageData) {
+  release (tag: string, data?: StorageData) {
     if (this.config.release && isDef(this.data[tag])) {
       // handle duration: 0(suggestion) or undefined means infinity
       if (this.config.duration) {
@@ -38,25 +41,25 @@ export class AxiosSugarInnerStorage implements AxiosSugarStorage {
       } 
       // handle limit
       else if (
-        isDef(res) &&
-        sizeof(this.data) + sizeof(res) > this.config.limit
+        isDef(data) &&
+        sizeof(this.data) + sizeof(data) > this.config.limit
       ) {
         // callback
         if (isFn(this.full)) {
-          this.full(tag, res);
+          this.full(tag, data);
         }
       }
     }
   }
 
-  full (tag: string, res: StorageData) {
+  full (tag: string, data: StorageData) {
     throwError('The capacity of the storage is full');
   }
 
-  set (tag: string, res: StorageData): Boolean {
+  set (tag: string, data: StorageData): Boolean {
     try {
-      this.release(tag, res);
-      this.data[tag] = res;
+      this.release(tag, data);
+      this.data[tag] = data;
       return true;
     } catch (err) {
       if (isDev()) {
@@ -73,9 +76,13 @@ export class AxiosSugarInnerStorage implements AxiosSugarStorage {
 }
 
 export class AxiosSugarLocalStorage implements AxiosSugarStorage {
-  set (tag: string, res: StorageData): Boolean {
+  data: {[key: string]: StorageData};
+  constructor () {
+    this.data = {};
+  }
+  set (tag: string, data: StorageData): Boolean {
     try {
-      localStorage.setItem(tag, JSON.stringify(res));
+      localStorage.setItem(tag, JSON.stringify(data));
       return true;
     } catch (err) {
       if (isDev()) {

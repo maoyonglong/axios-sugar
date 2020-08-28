@@ -2,30 +2,35 @@ import { MiddleResponseError } from './dispatchRequest';
 import { isNum, isFn } from './utils';
 import { AxiosSugar } from './AxiosSugar';
 
-export default function (config: MiddleResponseError) {
-  const count = config.count;
+export default function (err: MiddleResponseError) {
   const _this = this as AxiosSugar;
 
-  if (!isNum(count)) {
-    config.count = 0;
+  if (isNum(err.count)) {
+    err.count += 1;
+  } else {
+    err.count = 1;
   }
 
   if (
-    isNum(config.sugar.retry.count) &&
-    count <= config.sugar.retry.count
+    isNum(err.sugar.retry.count) &&
+    err.count <= err.sugar.retry.count
   ) {
-    return new Promise((resolve) => {
+    const retried = _this.events['retried'];
+    if (retried) {
+      retried.call(_this, err);
+    }
+    return new Promise((resolve, reject) => {
      setTimeout(function () {
-      resolve(_this.request(config));
-     }, config.sugar.retry.delay);
+      reject(_this.request(err));
+     }, err.sugar.retry.delay);
     });
   } else {
     const retryFailed = _this.events['retryFailed'];
 
     if (isFn(retryFailed)) {
-      retryFailed.call(_this, config);
+      retryFailed.call(_this, err);
     }
 
-    return Promise.reject(config);
+    return new Error('[axios-sugar]: retryFiled.');
   }
 }

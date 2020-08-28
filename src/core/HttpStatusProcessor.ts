@@ -1,4 +1,4 @@
-import { error, isDev, warn, isOnline, isFn } from './utils';
+import { error, isDev, warn, isOnline, isFn, capitalize } from './utils';
 import { AxiosError } from 'axios/index';
 import retryFn from './retry';
 import { MiddleResponseConfig, MiddleResponseError } from './dispatchRequest';
@@ -8,6 +8,20 @@ interface retry {
   (): Boolean
 }
 
+interface handlerFn {
+  (
+    status?: string,
+    payload?: MiddleResponseError | MiddleResponseConfig,
+    result?: any,
+    retry?: retry
+  ): any;
+}
+
+// 1XX -> 5XX
+const statusKinds = [
+  '1', '2', '3', '4', '5'
+];
+
 class HttpStatusProcessorPrototype {
   protected statusTable: Object;
   protected reservedCodes: string[];
@@ -15,14 +29,14 @@ class HttpStatusProcessorPrototype {
 
   constructor () {
     this.statusTable = {
-      200: this.onOk,
-      201: this.onCreated,
-      202: this.onAccepted,
-      203: this.onNonAuthoritativeInformation,
-      204: this.onNoContent,
-      205: this.onResetContent,
-      206: this.onPartialContent,
-      207: this.onMultiStatus,
+      // 200: this.onOk,
+      // 201: this.onCreated,
+      // 202: this.onAccepted,
+      // 203: this.onNonAuthoritativeInformation,
+      // 204: this.onNoContent,
+      // 205: this.onResetContent,
+      // 206: this.onPartialContent,
+      // 207: this.onMultiStatus,
       400: this.onBadRequest,
       401: this.onUnauthorized,
       403: this.onForbidden,
@@ -40,7 +54,7 @@ class HttpStatusProcessorPrototype {
     this.reservedCodes = Object.keys(this.statusTable);
   }
 
-  setStatusHandler (status: string, fn: Function): Boolean {
+  setStatusHandler (status: string, fn: handlerFn): Boolean {
     if (this.reservedCodes.indexOf(status) < 0) {
       this.statusTable[status] = fn;
       return true;
@@ -77,17 +91,26 @@ class HttpStatusProcessorPrototype {
       return false;
     } : undefined;
 
-    // onXXXBefore function
-    if (this[`on${firstCode}XXBefore`]) {
-      result = this[`on${firstCode}XXBefore`].call(axiosSugar, status, payload, result, retry);
-    }
-    if (this.statusTable[status]) {
-      result = this.statusTable[status].call(axiosSugar, status, payload, result, retry);
-    }
-    if (this[`on${firstCode}XXAfter`]) {
-      result = this.statusTable[status].call(axiosSugar, status, payload, result, retry);
+    function handlerCall (fn: handlerFn, result: any) {
+      return fn.call(axiosSugar, status, payload, result, retry);
     }
     
+    if (isFn(this[`on${firstCode}XXBefore`])) {
+      result = handlerCall(this[`on${firstCode}XXBefore`], result);
+    } else if (isFn(this.onStatusBefore)) {
+      result = handlerCall(this.onStatusBefore, result);
+    }
+
+    if (isFn(this.statusTable[status])) {
+      result = handlerCall(this.statusTable[status], result);
+    }
+
+    if (isFn(this[`on${firstCode}XXAfter`])) {
+      result = handlerCall(this[`on${firstCode}XXAfter`], result);
+    } else if (isFn(this.onStatusAfter)) {
+      result = handlerCall(this.onStatusAfter, result);
+    }
+
     return retriedRequest || result;
   }
 }
@@ -111,13 +134,10 @@ const errorhandlers = [
 
 function autoRetry (axiosSugar: AxiosSugar, err: MiddleResponseError, retry: retry) {
   if (retry && err.sugar.retry.auto) {
-    // retry() returns true means that has been already retried
-    if (retry()) {
-      const retried = axiosSugar.events['retried'];
-      if (retried) {
-        retried.call(axiosSugar, err);
-      }
-    }
+    // retry() returns false means that it has been already retried before.
+    if (!retry()) {
+      warn('retry has been already retried before')
+    } 
   }
 }
 
@@ -138,6 +158,10 @@ errorhandlers.forEach(h => {
   };
 });
 
+HttpStatusProcessor.prototype.on = function (event: string, fn: handlerFn) {
+  this['on' + capitalize(event)] = fn;
+};
+
 HttpStatusProcessor.prototype['onTimeout'] = async function (
   status: string,
   err: MiddleResponseError,
@@ -155,7 +179,7 @@ HttpStatusProcessor.prototype['onTimeout'] = async function (
       }
       const onlineTimeout = this.events['onlineTimeout'];
       if (isFn(onlineTimeout)) {
-        this.events['onlineTimeout'].call(this, err);
+        this.events['onlineTimeout'].call(this, err, retry);
       }
       autoRetry((this as AxiosSugar), err, retry);
     } else {
@@ -168,8 +192,13 @@ HttpStatusProcessor.prototype['onTimeout'] = async function (
       }
       // retry when online
       if (onlineCheck.reconnect.enable) {
-        err.offlineTimer = setInterval(() => {
-          autoRetry((this as AxiosSugar), err, retry);
+        const timer = setInterval(() => {
+          const online = this.events['online'];
+          if (isFn(online)) {
+            this.events['online'].call(this, err, retry);
+            clearInterval(timer);
+            autoRetry((this as AxiosSugar), err, retry);
+          }
         }, onlineCheck.reconnect.delay);
       }
     }
@@ -177,6 +206,7 @@ HttpStatusProcessor.prototype['onTimeout'] = async function (
     if (isDev()) {
       error(err.reason.message);
     }
+    autoRetry((this as AxiosSugar), err, retry);
   }
 
   return err.reason as AxiosError;

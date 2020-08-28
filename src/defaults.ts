@@ -28,7 +28,7 @@ interface onlineCheck {
 }
 
 export interface AxiosSugarConfig {
-  onlineCheck: onlineCheck;
+  onlineCheck?: onlineCheck;
   repeat?: repeat;
   retry?: retry;
   save?: save;
@@ -39,7 +39,7 @@ const defaults: AxiosSugarConfig = {
     interval: 2000
   },
   onlineCheck: {
-    enable: true,
+    enable: false,
     timeout: 5000,
     reconnect: {
       enable: true,

@@ -1,15 +1,18 @@
 import defaults, { AxiosSugarConfig } from '../defaults';
 import axios from 'axios';
 import { AxiosSugarInterceptorManager } from './AxiosSugarInterceptorManager';
-import { AxiosRequestConfig, AxiosError, AxiosInstance } from 'axios/index';
+import { AxiosRequestConfig, AxiosInstance } from 'axios/index';
 import dispatchRequest, { MiddleRequestConfig } from './dispatchRequest'
 import initInterceptors from './initInterceptors';
 import { repeatTag } from './repeat';
 import HttpStatusProcessor from './HttpStatusProcessor';
 import MiddleData from './MiddleData';
 import { isFn, isNum, isStr } from './utils';
-import { deepMerge, merge } from './utils';
+import { merge } from './utils';
+import mergeConfig from './mergeConfig';
 import { MiddleResponseError } from './dispatchRequest';
+
+const httpStatusProcessor = new HttpStatusProcessor();
 
 export interface Interceptors {
   request: AxiosSugarInterceptorManager;
@@ -24,9 +27,23 @@ type Events = {
   [key in Event]: Function;
 } | {};
 
+interface spreadCallback {
+  (...args: unknown[])
+}
 
-class AxiosSugarPrototype {
+interface CancelConfig {
+  cancel: Function;
+  config: MiddleRequestConfig;
+}
+
+export class AxiosSugar {
+  axios: AxiosInstance;
+  interceptors: Interceptors;
+  config: AxiosSugarConfig;
+  events: Events;
   httpStatusProcessor: HttpStatusProcessor;
+  // properties to static
+  [key: string]: any;
   get: (url: string, axiosConfig?: AxiosRequestConfig, config?: AxiosSugarConfig) => Promise<any>;
   post: (url: string, axiosConfig?: AxiosRequestConfig, config?: AxiosSugarConfig) => Promise<any>;
   head: (url: string, axiosConfig?: AxiosRequestConfig, config?: AxiosSugarConfig) => Promise<any>;
@@ -34,10 +51,6 @@ class AxiosSugarPrototype {
   delete: (url: string, axiosConfig?: AxiosRequestConfig, config?: AxiosSugarConfig) => Promise<any>;
   put: (url: string, axiosConfig?: AxiosRequestConfig, config?: AxiosSugarConfig) => Promise<any>;
   patch: (url: string, axiosConfig?: AxiosRequestConfig, config?: AxiosSugarConfig) => Promise<any>;
-
-  constructor () {
-    this.httpStatusProcessor = new HttpStatusProcessor();
-  }
 
   request (axiosConfig: AxiosRequestConfig | MiddleResponseError, config?: AxiosSugarConfig): Promise<any>;
   request (url: string, axiosConfig?: AxiosRequestConfig | MiddleResponseError, config?: AxiosSugarConfig): Promise<any>;
@@ -55,7 +68,7 @@ class AxiosSugarPrototype {
       config = args[1];
     }
 
-    config = config ? deepMerge(defaults, config) : _this.config;
+    config = config ? mergeConfig(defaults, config) : _this.config;
   
     const chain = [dispatchRequest.bind(this), undefined];
   
@@ -64,7 +77,7 @@ class AxiosSugarPrototype {
     const data = middleResponseError.isAxiosSugarError ? {
       axios: middleResponseError.axios,
       sugar: middleResponseError.sugar,
-      count: isNum(middleResponseError.count) ? ++middleResponseError.count : middleResponseError.count
+      count: isNum(middleResponseError.count) ? middleResponseError.count : middleResponseError.count
     } : {
       axios: axiosConfig,
       sugar: config,
@@ -88,16 +101,21 @@ class AxiosSugarPrototype {
     
     return promise;
   }
-}
 
-export class AxiosSugar extends AxiosSugarPrototype {
-  axios: AxiosInstance;
-  interceptors: Interceptors;
-  config: AxiosSugarConfig;
-  events: Events;
+  on (event: Event, fn: Function) {
+    this.events[event] = fn;
+  }
+  
+  off (event: Event, fn: Function): Boolean {
+    if (this.events[event] === fn) {
+      this.events[event] = undefined;
+      return true;
+    }
+    return false;
+  }
   // e.g. axiosSugar.get({}, {timeout: 1000})
   constructor (axiosConfig?: AxiosRequestConfig, config?: AxiosSugarConfig) {
-    super();
+    this.httpStatusProcessor = httpStatusProcessor;
     this.axios = axios.create(axiosConfig);
     this.config = config || Object.assign({}, defaults);
     this.events = {};
@@ -137,78 +155,78 @@ export class AxiosSugar extends AxiosSugarPrototype {
   };
 });
 
-export class AxiosSugarStatic extends AxiosSugar {
+class AxiosSugarStatic extends AxiosSugar {
   defaults: AxiosSugarConfig;
   axiosDefaults: AxiosRequestConfig;
-  AxiosSugar: AxiosSugar;
-  create: (axiosConfig?: AxiosRequestConfig, config?: AxiosSugarConfig) => AxiosSugar;
-  on: (event: Event, fn: Function) => void;
-  off: (event: Event, fn: Function) => Boolean;
-  repeatTag: (axiosConfig?: AxiosRequestConfig, config?: AxiosSugarConfig) => string;
-  isCancel: (err: AxiosError) => Boolean;
-  cancelAll: () => void;
-  cancelFilter: (cancelConfigs: Array<CancelConfig>) => Array<CancelConfig>;
+  axios: AxiosInstance;
+  static AxiosSugarStatic: (axiosConfig?: AxiosRequestConfig, config?: AxiosSugarConfig) => AxiosSugar;
+  [key: string]: any;
+  create (
+    axiosConfig?: AxiosRequestConfig,
+    config?: AxiosSugarConfig
+  ): AxiosSugar {
+    if (config) {
+      config = mergeConfig(defaults, config);
+    }
+    return new AxiosSugar(axiosConfig, config);
+  }
+  
+  repeatTag = repeatTag
+  
+  isCancel (err: MiddleResponseError): Boolean {
+    if (err.reason) {
+      return axios.isCancel(err.reason);
+    } else {
+      return false;
+    }
+  }
+  
+  getUri (config: AxiosRequestConfig) {
+    return axios.getUri(config);
+  }
+  
+  spread (fn: spreadCallback) {
+    return axios.spread(fn)
+  }
+  
+  all (...args: unknown[]) {
+    return axios.all(args);
+  }
+  
+  cancelAll (): void {
+    let cancelConfigs: Array<CancelConfig> = [];
+    MiddleData.configs.map(c => {
+      if (c !== null) {
+        cancelConfigs.push({
+          cancel: MiddleData.cancels[c.index],
+          config: c
+        });
+      }
+    });
+  
+    if (isFn(this.cancelFilter)) {
+      cancelConfigs = this.cancelFilter(cancelConfigs);
+    }
+  
+    cancelConfigs.forEach(c => {
+      c.cancel();
+    });
+  }
+
+  cancelFilter (cancelConfigs: Array<CancelConfig>): Array<CancelConfig> {
+    return cancelConfigs.filter((c) => !c.config.cancelDisabled);
+  }
+  
+  cancelAutoRetry (err: MiddleResponseError) {
+    err.sugar.retry.auto = false;
+  }
 
   constructor () {
     super();
     this.defaults = defaults;
     this.axiosDefaults = axios.defaults;
+    this.axios = axios;
   }
-}
-
-AxiosSugarStatic.prototype.create = function (
-  axiosConfig?: AxiosRequestConfig,
-  config?: AxiosSugarConfig
-): AxiosSugar {
-  if (config) {
-    config = deepMerge(defaults, config);
-  }
-  return new AxiosSugar(axiosConfig, config);
 };
 
-AxiosSugarStatic.prototype.repeatTag = repeatTag;
-
-AxiosSugarStatic.prototype.on = function (event: Event, fn: Function) {
-  this.events[event] = fn;
-};
-
-AxiosSugarStatic.prototype.off = function (event: Event, fn: Function): Boolean {
-  if (this.events[event] === fn) {
-    this.events[event] = undefined;
-    return true;
-  }
-  return false;
-}
-
-AxiosSugarStatic.prototype.isCancel = function (err: AxiosError): Boolean {
-  return axios.isCancel(err);
-}
-
-interface CancelConfig {
-  cancel: Function;
-  config: MiddleRequestConfig;
-}
-
-AxiosSugarStatic.prototype.cancelAll = function (): void {
-  let cancelConfigs: Array<CancelConfig> = [];
-  MiddleData.configs.map(c => {
-    if (c !== null) {
-      cancelConfigs.push({
-        cancel: MiddleData.cancels[c.index],
-        config: c
-      });
-    }
-  });
-
-  if (isFn(this.cancelFilter)) {
-    cancelConfigs = this.cancelFilter(cancelConfigs);
-  }
-
-  cancelConfigs.forEach(c => {
-    c.cancel();
-  });
-}
-
-AxiosSugarStatic.prototype.cancelFilter = function (cancelConfigs: Array<CancelConfig>): Array<CancelConfig> {
-  return cancelConfigs.filter((c) => !c.config.cancelDisabled);
-}
+export const SugarStatic = new AxiosSugarStatic();

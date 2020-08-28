@@ -1,25 +1,25 @@
-// import AxiosSugar from '../../src/index';
-// import sugarDefaults from '../../src/defaults';
-// import { expect } from 'chai';
-// import { deepMerge } from '../../src/core/utils';
+import AxiosSugar from '../../src/index';
+import sugarDefaults from '../../src/defaults';
+import { expect } from 'chai';
+import mergeConfig from '../../src/core/mergeConfig';
 
-// it('empty', () => {
-//   const newAxiosSugar = AxiosSugar.create();
-//   expect(newAxiosSugar.config).to.deep.eq(sugarDefaults);
-// });
+it('empty', () => {
+  const newAxiosSugar = AxiosSugar.create();
+  expect(newAxiosSugar.config).to.deep.eq(sugarDefaults);
+});
 
-// it('sugarConfigMerge', () => {
-//   const newAxiosSugar = AxiosSugar.create(undefined, {
-//     retry: {
-//       auto: false
-//     }
-//   });
+it('sugarConfigMerge', () => {
+  const newAxiosSugar = AxiosSugar.create({}, {
+    retry: {
+      auto: false
+    }
+  });
 
-//   const config = deepMerge(sugarDefaults, {
-//     retry: {
-//       auto: false
-//     }
-//   });
+  const config = mergeConfig(sugarDefaults, {
+    retry: {
+      auto: false
+    }
+  });
 
-//   expect(newAxiosSugar.config).to.deep.eq(config);
-// });
+  expect(newAxiosSugar.config).to.deep.eq(config);
+});

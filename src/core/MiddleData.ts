@@ -15,4 +15,14 @@ const middleData: MiddleData = {
   configs: [] // middleRequestConfig Array
 };
 
+// destory some special data in MiddleData
+export function dataDestory (index) {
+  middleData.configs[index] = null;
+
+  if (middleData.tags[index] !== null) {
+    middleData.tags[index] = null;
+    middleData.cancels[index] = null;
+  }
+}
+
 export default middleData;
