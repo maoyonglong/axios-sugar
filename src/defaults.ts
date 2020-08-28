@@ -17,13 +17,11 @@ interface save {
 }
 
 interface reconnect {
-  enable?: Boolean;
-  delay?: number;
+  enable?: Boolean
 }
 
 interface onlineCheck {
   enable?: Boolean;
-  timeout?: number;
   reconnect?: reconnect;
 }
 
@@ -40,10 +38,8 @@ const defaults: AxiosSugarConfig = {
   },
   onlineCheck: {
     enable: false,
-    timeout: 5000,
     reconnect: {
-      enable: true,
-      delay: 5000
+      enable: true
     }
   },
   save: {

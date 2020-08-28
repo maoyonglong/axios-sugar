@@ -171,9 +171,7 @@ HttpStatusProcessor.prototype['onTimeout'] = async function (
   const onlineCheck = err.sugar.onlineCheck
 
   if (onlineCheck.enable) {
-    if (await isOnline({
-      timeout: onlineCheck.timeout
-    })) {
+    if (isOnline()) {
       if (isDev()) {
         error(`online but timeout`);
       }
@@ -192,14 +190,13 @@ HttpStatusProcessor.prototype['onTimeout'] = async function (
       }
       // retry when online
       if (onlineCheck.reconnect.enable) {
-        const timer = setInterval(() => {
+        window.addEventListener('online', () => {
           const online = this.events['online'];
           if (isFn(online)) {
             this.events['online'].call(this, err, retry);
-            clearInterval(timer);
             autoRetry((this as AxiosSugar), err, retry);
           }
-        }, onlineCheck.reconnect.delay);
+        });
       }
     }
   } else {

@@ -1,8 +1,7 @@
 import {
   deepMerge as deepMergeFn,
   merge as mergeFn
-} from 'axios/lib/utils';
-import isOnlineFn from 'is-online';
+} from '../vendor/axios/utils.js';
 
 export function capitalize (str: string): string {
   return str.substring(0, 1).toUpperCase() + str.substring(1);
@@ -77,7 +76,5 @@ interface onlineOptions {
 }
 
 export function isOnline (options: onlineOptions = {timeout: 5000}) {
-  return isOnlineFn({
-    timeout: options.timeout
-  });
+  return navigator.onLine;
 }

@@ -6,8 +6,7 @@
     "esModuleInterop": true
   },
   "include": [
-    "src",
-    "node_modules/axios/lib/utils.js"
+    "src"
   ],
   "exclude": [
     "node_modules"

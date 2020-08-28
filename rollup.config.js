@@ -5,7 +5,8 @@ const isProd = /production/.test(process.env.NODE_ENV)
 
 let plugins = [
   typescript({
-    useTsconfigDeclarationDir: true
+    useTsconfigDeclarationDir: true,
+    objectHashIgnoreUnknownHack: true
   })
 ]
 
@@ -34,5 +35,5 @@ export default {
   input: 'src/index.ts',
   output,
   plugins,
-  include: ['node_modules/axios/lib/utils.js']
+  external: ['axios']
 }

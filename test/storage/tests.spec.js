@@ -1,4 +1,4 @@
-const storage = new AxiosSugar.inner();
+const storage = new AxiosSugar.storage.inner();
 const expect = chai.expect;
 
 it('inner:set', () => {
@@ -11,7 +11,7 @@ it('inner:get', () => {
   expect(storage.get('')).to.null;
 });
 
-const storage2 = new AxiosSugar.local();
+const storage2 = new AxiosSugar.storage.local();
 
 it('local:set', () => {
   storage2.set('first', 1);

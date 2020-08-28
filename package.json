@@ -60,7 +60,6 @@
     "mocha": "^7.2.0",
     "node-localstorage": "^2.1.5",
     "rollup": "^1.32.1",
-    "rollup-plugin-typescript": "^1.0.1",
     "rollup-plugin-typescript2": "^0.25.3",
     "rollup-plugin-uglify": "^6.0.4",
     "ts-node": "^8.10.2",
@@ -68,7 +67,6 @@
   },
   "dependencies": {
     "axios": "^0.19.2",
-    "is-online": "^8.4.0",
     "object-sizeof": "^1.6.1"
   },
   "config": {

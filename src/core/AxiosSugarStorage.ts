@@ -1,6 +1,6 @@
 import { getDurationMS, isDef, error, merge, isFn, throwError, isDev } from './utils';
-import sizeof from 'object-sizeof';
 import { StorageData } from './storage';
+import sizeof from '../vendor/sizeof';
 
 export interface AxiosSugarStorage {
   data: {[key: string]: StorageData};
