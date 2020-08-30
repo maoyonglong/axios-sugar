@@ -37,7 +37,7 @@ AxiosSugar.get('/somePath', {
 ```
 它的用法和axios.js真的很类似！其它的像*request*, *get*, *post*, *delete*, *put*, *patch*, *head*, *options*的一些方法也一样。
   
-不同的是，除了axios方法原来接收的参数，这些请求方法还接收另一个类型为[AxiosSugarConfig](https://myl970421.gitee.io/axios-sugar-docs/zh/guide/configuration)的参数。
+不同的是，除了axios方法原来接收的参数，这些请求方法还接收另一个类型为[AxiosSugarConfig](https://myl970421.gitee.io/axios-sugar-docs/zh/guide/configuration.html#axiossugarconfig)的参数。
 例如：
 ```js
 AxiosSugar.get('/somePath'， {
