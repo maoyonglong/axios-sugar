@@ -55,4 +55,4 @@ export default (data) => {
   } else {
     return result;
   }
-}
+};

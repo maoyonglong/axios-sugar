@@ -34,12 +34,12 @@ function forEach(obj, fn) {
 
   if (isArray(obj)) {
     // Iterate over array values
-    for (var i = 0, l = obj.length; i < l; i++) {
+    for (let i = 0, l = obj.length; i < l; i++) {
       fn.call(null, obj[i], i, obj);
     }
   } else {
     // Iterate over object keys
-    for (var key in obj) {
+    for (const key in obj) {
       if (Object.prototype.hasOwnProperty.call(obj, key)) {
         fn.call(null, obj[key], key, obj);
       }
@@ -65,7 +65,7 @@ function forEach(obj, fn) {
  * @returns {Object} Result of all merge properties
  */
 export function merge(/* obj1, obj2, obj3, ... */...args) {
-  var result = {};
+  const result = {};
   function assignValue(val, key) {
     if (typeof result[key] === 'object' && typeof val === 'object') {
       result[key] = merge(result[key], val);
@@ -74,7 +74,7 @@ export function merge(/* obj1, obj2, obj3, ... */...args) {
     }
   }
 
-  for (var i = 0, l = arguments.length; i < l; i++) {
+  for (let i = 0, l = arguments.length; i < l; i++) {
     forEach(args[i], assignValue);
   }
   return result;
@@ -89,7 +89,7 @@ export function merge(/* obj1, obj2, obj3, ... */...args) {
  * @returns {Object} Result of all merge properties
  */
 export function deepMerge(/* obj1, obj2, obj3, ... */...args) {
-  var result = {};
+  const result = {};
   function assignValue(val, key) {
     if (typeof result[key] === 'object' && typeof val === 'object') {
       result[key] = deepMerge(result[key], val);
@@ -100,7 +100,7 @@ export function deepMerge(/* obj1, obj2, obj3, ... */...args) {
     }
   }
 
-  for (var i = 0, l = arguments.length; i < l; i++) {
+  for (let i = 0, l = arguments.length; i < l; i++) {
     forEach(args[i], assignValue);
   }
   return result;

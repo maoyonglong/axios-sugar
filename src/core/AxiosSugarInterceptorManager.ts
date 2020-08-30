@@ -21,15 +21,15 @@ export class AxiosSugarInterceptorManager {
 
   eject (i: number) {
     if (this.handlers[i]) {
-      this.handlers[i] = null
+      this.handlers[i] = null;
     }
   }
 
   each (fn: Function) {
     this.handlers.forEach((handler: ManagerHandler) => {
       if (handler !== null) {
-        fn(handler)
+        fn(handler);
       }
-    })
+    });
   }
 }

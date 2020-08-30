@@ -38,7 +38,7 @@ AxiosSugar.get('/somePath', {
 ```
 Look, it's really like Axios！The *request*, *get*, *post*, *delete*, *put*, *patch*, *head*, *options* is also.  
   
-The difference is that these methods also receive an [AxiosSugarConfig](https://maoyonglong.github.io/guide/configuration) type parameter.
+The difference is that these methods also receive an [AxiosSugarConfig](https://maoyonglong.github.io/axios-sugar-docs/guide/configuration) type parameter.
 e.g.  
 ```js
 AxiosSugar.get('/somePath'， {

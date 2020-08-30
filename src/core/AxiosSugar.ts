@@ -2,12 +2,12 @@ import defaults, { AxiosSugarConfig } from '../defaults';
 import axios from 'axios';
 import { AxiosSugarInterceptorManager } from './AxiosSugarInterceptorManager';
 import { AxiosRequestConfig, AxiosInstance } from 'axios/index';
-import dispatchRequest, { MiddleRequestConfig } from './dispatchRequest'
+import dispatchRequest, { MiddleRequestConfig } from './dispatchRequest';
 import initInterceptors from './initInterceptors';
 import { repeatTag } from './repeat';
 import HttpStatusProcessor from './HttpStatusProcessor';
 import MiddleData from './MiddleData';
-import { isFn, isNum, isStr } from './utils';
+import { isFn, isStr } from './utils';
 import { merge } from './utils';
 import mergeConfig from './mergeConfig';
 import { MiddleResponseError } from './dispatchRequest';
@@ -28,7 +28,7 @@ type Events = {
 } | {};
 
 interface spreadCallback {
-  (...args: unknown[])
+  (...args: unknown[]);
 }
 
 interface CancelConfig {
@@ -57,7 +57,7 @@ export class AxiosSugar {
   request (...args): Promise<any> {
     let axiosConfig: AxiosRequestConfig | MiddleResponseError;
     let config: AxiosSugarConfig;
-    const _this = this as unknown as AxiosSugar
+    const _this = this as unknown as AxiosSugar;
 
     if (isStr(args[0])) {
       axiosConfig = args[1] || {};
@@ -77,11 +77,10 @@ export class AxiosSugar {
     const data = middleResponseError.isAxiosSugarError ? {
       axios: middleResponseError.axios,
       sugar: middleResponseError.sugar,
-      count: isNum(middleResponseError.count) ? middleResponseError.count : middleResponseError.count
+      count: middleResponseError.count
     } : {
       axios: axiosConfig,
-      sugar: config,
-      cancelDisabled: false
+      sugar: config
     };
   
     // dispatch data to dispatchRequest and interceptors
@@ -89,11 +88,11 @@ export class AxiosSugar {
   
     _this.interceptors.request.each((interceptor) => {
       chain.unshift(interceptor.fulfilled, interceptor.rejected);
-    })
+    });
   
     _this.interceptors.response.each((interceptor) => {
       chain.push(interceptor.fulfilled, interceptor.rejected);
-    })
+    });
   
     while (chain.length) {
       promise = promise.then(chain.shift(), chain.shift());
@@ -106,7 +105,7 @@ export class AxiosSugar {
     this.events[event] = fn;
   }
   
-  off (event: Event, fn: Function): Boolean {
+  off (event: Event, fn: Function): boolean {
     if (this.events[event] === fn) {
       this.events[event] = undefined;
       return true;
@@ -171,9 +170,9 @@ class AxiosSugarStatic extends AxiosSugar {
     return new AxiosSugar(axiosConfig, config);
   }
   
-  repeatTag = repeatTag
+  repeatTag = repeatTag;
   
-  isCancel (err: MiddleResponseError): Boolean {
+  isCancel (err: MiddleResponseError): boolean {
     if (err.reason) {
       return axios.isCancel(err.reason);
     } else {
@@ -186,7 +185,7 @@ class AxiosSugarStatic extends AxiosSugar {
   }
   
   spread (fn: spreadCallback) {
-    return axios.spread(fn)
+    return axios.spread(fn);
   }
   
   all (...args: unknown[]) {
@@ -195,6 +194,7 @@ class AxiosSugarStatic extends AxiosSugar {
   
   cancelAll (): void {
     let cancelConfigs: Array<CancelConfig> = [];
+
     MiddleData.configs.map(c => {
       if (c !== null) {
         cancelConfigs.push({
@@ -207,6 +207,8 @@ class AxiosSugarStatic extends AxiosSugar {
     if (isFn(this.cancelFilter)) {
       cancelConfigs = this.cancelFilter(cancelConfigs);
     }
+
+    console.log(cancelConfigs)
   
     cancelConfigs.forEach(c => {
       c.cancel();
@@ -214,7 +216,7 @@ class AxiosSugarStatic extends AxiosSugar {
   }
 
   cancelFilter (cancelConfigs: Array<CancelConfig>): Array<CancelConfig> {
-    return cancelConfigs.filter((c) => !c.config.cancelDisabled);
+    return cancelConfigs.filter((c) => !c.config.sugar.cancelDisabled);
   }
   
   cancelAutoRetry (err: MiddleResponseError) {
@@ -227,6 +229,6 @@ class AxiosSugarStatic extends AxiosSugar {
     this.axiosDefaults = axios.defaults;
     this.axios = axios;
   }
-};
+}
 
 export const SugarStatic = new AxiosSugarStatic();

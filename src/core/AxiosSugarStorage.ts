@@ -4,7 +4,7 @@ import sizeof from '../vendor/sizeof';
 
 export interface AxiosSugarStorage {
   data: {[key: string]: StorageData};
-  set: (tag: string, data: StorageData) => Boolean;
+  set: (tag: string, data: StorageData) => boolean;
   get: (tag: string) => StorageData | null;
   [key: string]: any;
 }
@@ -56,7 +56,7 @@ export class AxiosSugarInnerStorage implements AxiosSugarStorage {
     throwError('The capacity of the storage is full');
   }
 
-  set (tag: string, data: StorageData): Boolean {
+  set (tag: string, data: StorageData): boolean {
     try {
       this.release(tag, data);
       this.data[tag] = data;
@@ -80,7 +80,7 @@ export class AxiosSugarLocalStorage implements AxiosSugarStorage {
   constructor () {
     this.data = {};
   }
-  set (tag: string, data: StorageData): Boolean {
+  set (tag: string, data: StorageData): boolean {
     try {
       localStorage.setItem(tag, JSON.stringify(data));
       return true;

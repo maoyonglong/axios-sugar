@@ -23,7 +23,7 @@ export default {
 
     return null;
   },
-  set (config: MiddleResponseConfig): Boolean {
+  set (config: MiddleResponseConfig): boolean {
     const save = config.sugar.save;
 
     if (save.enable) {
@@ -41,4 +41,4 @@ export default {
 
     return false;
   }
-}
+};

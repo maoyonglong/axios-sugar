@@ -5,7 +5,7 @@ import { MiddleResponseConfig, MiddleResponseError } from './dispatchRequest';
 import { AxiosSugar } from './AxiosSugar';
 
 interface retry {
-  (): Boolean
+  (): boolean;
 }
 
 interface handlerFn {
@@ -23,7 +23,7 @@ const statusKinds = [
 ];
 
 class HttpStatusProcessorPrototype {
-  protected statusTable: Object;
+  protected statusTable: Record<string, any>;
   protected reservedCodes: string[];
   [key: string]: any;
 
@@ -49,12 +49,12 @@ class HttpStatusProcessorPrototype {
       500: this.onInternalServerError,
       501: this.onNotImplemented,
       502: this.onBadGateway
-    }
+    };
 
     this.reservedCodes = Object.keys(this.statusTable);
   }
 
-  setStatusHandler (status: string, fn: handlerFn): Boolean {
+  setStatusHandler (status: string, fn: handlerFn): boolean {
     if (this.reservedCodes.indexOf(status) < 0) {
       this.statusTable[status] = fn;
       return true;
@@ -136,7 +136,7 @@ function autoRetry (axiosSugar: AxiosSugar, err: MiddleResponseError, retry: ret
   if (retry && err.sugar.retry.auto) {
     // retry() returns false means that it has been already retried before.
     if (!retry()) {
-      warn('retry has been already retried before')
+      warn('retry has been already retried before');
     } 
   }
 }
@@ -168,7 +168,7 @@ HttpStatusProcessor.prototype['onTimeout'] = async function (
   result: any,
   retry?: retry
 ): Promise<AxiosError> {
-  const onlineCheck = err.sugar.onlineCheck
+  const onlineCheck = err.sugar.onlineCheck;
 
   if (onlineCheck.enable) {
     if (isOnline()) {
@@ -207,6 +207,6 @@ HttpStatusProcessor.prototype['onTimeout'] = async function (
   }
 
   return err.reason as AxiosError;
-}
+};
 
 export default HttpStatusProcessor;

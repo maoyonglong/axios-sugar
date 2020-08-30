@@ -13,4 +13,4 @@ export {
   HttpStatusProcessor,
   AxiosSugar,
   storage
-}
+};

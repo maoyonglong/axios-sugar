@@ -72,7 +72,7 @@ export function merge (...args) {
 }
 
 interface onlineOptions {
-  timeout?: number
+  timeout?: number;
 }
 
 export function isOnline (options: onlineOptions = {timeout: 5000}) {

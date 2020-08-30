@@ -14,7 +14,7 @@ function sendDataWay (method: string): 'data' | 'params' {
 }
 
 function querystring (url) {
-  let result = {};
+  const result = {};
   const index = url.indexOf('?');
   if (index >= 0) {
     const arr = url.trim().substring(url.indexOf()).split('&');
@@ -36,7 +36,7 @@ function getDataString (data) {
 }
 
 export function genSymbol (config: AxiosRequestConfig): string {
-  let { url } = config;
+  const { url } = config;
   const { method } = config;
   // the data send before
   let data;
@@ -59,7 +59,7 @@ export function genSymbol (config: AxiosRequestConfig): string {
   return `method=${method}&url=${url}&data=${data}`;
 }
 
-export function isInInterval (sendingTime: number, completeTime: number, interval: number): Boolean {
+export function isInInterval (sendingTime: number, completeTime: number, interval: number): boolean {
   return getDurationMS(completeTime, sendingTime) < interval;
 }
 
@@ -98,7 +98,7 @@ export default function (
     if (isFn(repeated)) {
       repeated.call(this, config);
     }
-  }
+  };
 
   // if repeat
   if (i >= 0) {

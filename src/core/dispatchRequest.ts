@@ -7,7 +7,7 @@ export interface MiddleRequestConfig {
   sugar: AxiosSugarConfig;
   index: number;
   count?: number;
-  cancelDisabled?: Boolean;
+  cancelDisabled?: boolean;
   sendingTime: number;
   cacheTime?: number;
   completeTime: number;
@@ -32,7 +32,7 @@ export class MiddleResponseError extends Error {
   sendingTime: number;
   completeTime: number;
   cacheTime?: number;
-  isAxiosSugarError: Boolean;
+  isAxiosSugarError: boolean;
   name: string;
 
   constructor (reason, config) {
@@ -71,7 +71,7 @@ export default function (
       sendingTime: config.sendingTime,
       cacheTime: cache.time,
       completeTime: new Date().getTime()
-    })
+    });
   } else {
     return this.axios.request(config.axios).then((response) => {
       config.completeTime = new Date().getTime();
@@ -82,7 +82,7 @@ export default function (
         index: config.index,
         sendingTime: config.sendingTime,
         completeTime: config.completeTime
-      }
+      };
     }, (reason) => {
       config.completeTime = new Date().getTime();
 
