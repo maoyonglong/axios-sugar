@@ -5,7 +5,6 @@ export interface MiddleRequestConfig {
     sugar: AxiosSugarConfig;
     index: number;
     count?: number;
-    cancelDisabled?: Boolean;
     sendingTime: number;
     cacheTime?: number;
     completeTime: number;
@@ -28,7 +27,7 @@ export declare class MiddleResponseError extends Error {
     sendingTime: number;
     completeTime: number;
     cacheTime?: number;
-    isAxiosSugarError: Boolean;
+    isAxiosSugarError: boolean;
     name: string;
     constructor(reason: any, config: any);
 }

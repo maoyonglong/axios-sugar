@@ -7,7 +7,6 @@ export interface MiddleRequestConfig {
   sugar: AxiosSugarConfig;
   index: number;
   count?: number;
-  cancelDisabled?: boolean;
   sendingTime: number;
   cacheTime?: number;
   completeTime: number;

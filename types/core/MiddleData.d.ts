@@ -1,8 +1,11 @@
 import { MiddleRequestConfig } from './dispatchRequest';
-interface MiddleData {
+declare class MiddleData {
+    static instance: MiddleData;
     tags: Array<string>;
     cancels: Array<Function>;
     configs: Array<MiddleRequestConfig>;
+    private constructor();
+    static getInstance(): MiddleData;
 }
 declare const middleData: MiddleData;
 export declare function dataDestory(index: any): void;

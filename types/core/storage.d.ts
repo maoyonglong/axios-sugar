@@ -7,6 +7,6 @@ export interface StorageData {
 }
 declare const _default: {
     get(config: MiddleRequestConfig): StorageData | null;
-    set(config: MiddleResponseConfig): Boolean;
+    set(config: MiddleResponseConfig): boolean;
 };
 export default _default;

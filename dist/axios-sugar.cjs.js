@@ -347,7 +347,8 @@ var defaults = {
         auto: true,
         count: 3,
         delay: 2000
-    }
+    },
+    cancelDisabled: false
 };
 
 var AxiosSugarInterceptorManager = (function () {
@@ -376,11 +377,19 @@ var AxiosSugarInterceptorManager = (function () {
     return AxiosSugarInterceptorManager;
 }());
 
-var middleData = {
-    tags: [],
-    cancels: [],
-    configs: []
-};
+var MiddleData = (function () {
+    function MiddleData() {
+        this.tags = [];
+        this.cancels = [];
+        this.configs = [];
+    }
+    MiddleData.getInstance = function () {
+        return MiddleData.instance;
+    };
+    MiddleData.instance = new MiddleData();
+    return MiddleData;
+}());
+var middleData = MiddleData.getInstance();
 function dataDestory(index) {
     middleData.configs[index] = null;
     if (middleData.tags[index] !== null) {
@@ -875,11 +884,10 @@ var AxiosSugar = (function () {
         var data = middleResponseError.isAxiosSugarError ? {
             axios: middleResponseError.axios,
             sugar: middleResponseError.sugar,
-            count: isNum(middleResponseError.count) ? middleResponseError.count : middleResponseError.count
+            count: middleResponseError.count
         } : {
             axios: axiosConfig,
-            sugar: config,
-            cancelDisabled: false
+            sugar: config
         };
         var promise = Promise.resolve(data);
         _this.interceptors.request.each(function (interceptor) {
@@ -972,12 +980,13 @@ var AxiosSugarStatic = (function (_super) {
         if (isFn(this.cancelFilter)) {
             cancelConfigs = this.cancelFilter(cancelConfigs);
         }
+        console.log(cancelConfigs);
         cancelConfigs.forEach(function (c) {
             c.cancel();
         });
     };
     AxiosSugarStatic.prototype.cancelFilter = function (cancelConfigs) {
-        return cancelConfigs.filter(function (c) { return !c.config.cancelDisabled; });
+        return cancelConfigs.filter(function (c) { return !c.config.sugar.cancelDisabled; });
     };
     AxiosSugarStatic.prototype.cancelAutoRetry = function (err) {
         err.sugar.retry.auto = false;

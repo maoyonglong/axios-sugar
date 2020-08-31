@@ -37,7 +37,7 @@ export declare class AxiosSugar {
     request(axiosConfig: AxiosRequestConfig | MiddleResponseError, config?: AxiosSugarConfig): Promise<any>;
     request(url: string, axiosConfig?: AxiosRequestConfig | MiddleResponseError, config?: AxiosSugarConfig): Promise<any>;
     on(event: Event, fn: Function): void;
-    off(event: Event, fn: Function): Boolean;
+    off(event: Event, fn: Function): boolean;
     constructor(axiosConfig?: AxiosRequestConfig, config?: AxiosSugarConfig);
 }
 declare class AxiosSugarStatic extends AxiosSugar {
@@ -48,7 +48,7 @@ declare class AxiosSugarStatic extends AxiosSugar {
     [key: string]: any;
     create(axiosConfig?: AxiosRequestConfig, config?: AxiosSugarConfig): AxiosSugar;
     repeatTag: typeof repeatTag;
-    isCancel(err: MiddleResponseError): Boolean;
+    isCancel(err: MiddleResponseError): boolean;
     getUri(config: AxiosRequestConfig): string;
     spread(fn: spreadCallback): (array: unknown[]) => any;
     all(...args: unknown[]): Promise<unknown[]>;

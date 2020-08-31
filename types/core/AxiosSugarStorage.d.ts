@@ -3,7 +3,7 @@ export interface AxiosSugarStorage {
     data: {
         [key: string]: StorageData;
     };
-    set: (tag: string, data: StorageData) => Boolean;
+    set: (tag: string, data: StorageData) => boolean;
     get: (tag: string) => StorageData | null;
     [key: string]: any;
 }
@@ -20,7 +20,7 @@ export declare class AxiosSugarInnerStorage implements AxiosSugarStorage {
     constructor(config?: InnerStorageConfig);
     release(tag: string, data?: StorageData): void;
     full(tag: string, data: StorageData): void;
-    set(tag: string, data: StorageData): Boolean;
+    set(tag: string, data: StorageData): boolean;
     get(tag: string): StorageData | null;
 }
 export declare class AxiosSugarLocalStorage implements AxiosSugarStorage {
@@ -28,7 +28,7 @@ export declare class AxiosSugarLocalStorage implements AxiosSugarStorage {
         [key: string]: StorageData;
     };
     constructor();
-    set(tag: string, data: StorageData): Boolean;
+    set(tag: string, data: StorageData): boolean;
     get(tag: string): StorageData | null;
 }
 export {};

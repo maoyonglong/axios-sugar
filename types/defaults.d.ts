@@ -3,20 +3,20 @@ interface repeat {
     interval?: number;
 }
 interface retry {
-    auto?: Boolean;
-    enable?: Boolean;
+    auto?: boolean;
+    enable?: boolean;
     count?: number;
     delay?: number;
 }
 interface save {
-    enable?: Boolean;
+    enable?: boolean;
     storage?: AxiosSugarStorage;
 }
 interface reconnect {
-    enable?: Boolean;
+    enable?: boolean;
 }
 interface onlineCheck {
-    enable?: Boolean;
+    enable?: boolean;
     reconnect?: reconnect;
 }
 export interface AxiosSugarConfig {
@@ -24,6 +24,7 @@ export interface AxiosSugarConfig {
     repeat?: repeat;
     retry?: retry;
     save?: save;
+    cancelDisabled?: Boolean;
 }
 declare const defaults: AxiosSugarConfig;
 export default defaults;
